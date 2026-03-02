@@ -1,0 +1,23 @@
+# API Cockpit - Cron Job Configuration
+# Copy to /etc/cron.d/api-cockpit or use with 'crontab -e'
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# Run full health check every 5 minutes
+*/5 * * * * root /root/.openclaw/workspace/skills/api-cockpit/cockpit-admin.sh health >> /root/.openclaw/workspace/skills/api-cockpit/logs/cron_health.log 2>&1
+
+# Check API quotas every 10 minutes
+*/10 * * * * root /root/.openclaw/workspace/skills/api-cockpit/check_quota.sh >> /root/.openclaw/workspace/skills/api-cockpit/logs/cron_quota.log 2>&1
+
+# Auto-rotation check every 15 minutes (if enabled)
+*/15 * * * * root /root/.openclaw/workspace/skills/api-cockpit/auto_rotate.sh >> /root/.openclaw/workspace/skills/api-cockpit/logs/cron_rotate.log 2>&1
+
+# Check cost budget threshold every hour
+0 * * * * root /root/.openclaw/workspace/skills/api-cockpit/check_cost.sh check >> /root/.openclaw/workspace/skills/api-cockpit/logs/cron_cost.log 2>&1
+
+# Daily cost report at 09:00 AM
+0 9 * * * root /root/.openclaw/workspace/skills/api-cockpit/check_cost.sh report >> /root/.openclaw/workspace/skills/api-cockpit/logs/cron_cost_report.log 2>&1
+
+# Daily skills sync at 02:00 AM
+0 2 * * * root /root/.openclaw/workspace/skills/api-cockpit/cockpit-admin.sh sync >> /root/.openclaw/workspace/skills/api-cockpit/logs/cron_sync.log 2>&1

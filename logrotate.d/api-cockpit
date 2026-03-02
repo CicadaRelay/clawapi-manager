@@ -1,0 +1,17 @@
+# API Cockpit - Log Rotation Configuration
+# Copy to /etc/logrotate.d/api-cockpit
+
+/root/.openclaw/workspace/skills/api-cockpit/logs/*.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0600 root root
+    sharedscripts
+    postrotate
+        # Optional: send alert if logs are being rotated frequently
+        true
+    endscript
+}
