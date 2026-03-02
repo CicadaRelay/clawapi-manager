@@ -184,3 +184,48 @@ python3 lib/model_switcher.py switch minimax/MiniMax-M2.5
 - ✅ 自动重启 daemon
 - ✅ 支持编号和 ID 两种方式
 
+
+## 使用场景
+
+### 场景 1：SSH/终端（推荐）
+完整的 Textual TUI，支持鼠标和键盘交互。
+
+```bash
+ssh user@server
+cd ~/.openclaw/workspace/skills/clawapi-manager
+python3 clawapi-tui.py
+```
+
+### 场景 2：受限终端
+Rich 交互式菜单，只支持键盘。
+
+```bash
+python3 clawapi-rich.py
+```
+
+### 场景 3：QQ/飞书等纯文字
+使用 CLI 命令。
+
+```bash
+./clawapi status
+./clawapi providers
+./clawapi add-provider openai https://api.openai.com/v1 sk-xxx
+```
+
+### 场景 4：智能自动选择
+自动检测环境并选择合适的界面。
+
+```bash
+python3 clawapi-ui.py
+```
+
+---
+
+## 环境检测
+
+| 环境 | 检测方式 | 使用界面 |
+|------|---------|---------|
+| SSH/终端 | `termios.tcgetattr()` | Textual TUI |
+| 受限终端 | `sys.stdin.isatty()` | Rich 菜单 |
+| QQ/飞书 | 非 TTY | CLI |
+
