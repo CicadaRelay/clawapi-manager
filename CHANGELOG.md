@@ -58,3 +58,67 @@
 - ✅ Model 管理
 - ✅ 自动备份
 - ✅ API key 脱敏
+
+## v1.3.0 (2026-03-03)
+
+### 新增功能
+- ✅ **API Key 轮换**
+  - 支持配置多个 API Key
+  - 自动轮换（rate-limit 时切换到下一个 Key）
+  - Cooldown 机制（1分钟 → 5分钟 → 25分钟 → 1小时）
+  - Billing disable（余额不足时禁用 5 小时）
+  - 显示 Key 状态和统计信息
+
+- ✅ **余额查询**
+  - 支持 OpenAI 余额查询
+  - 支持 Anthropic 余额查询
+  - 余额不足警告（< $5）
+  - 格式化输出
+
+- ✅ **Cooldown 状态管理**
+  - 显示 Cooldown 状态
+  - 显示 Billing disable 状态
+  - 显示错误次数
+  - 显示最后使用时间
+  - 支持手动重置统计
+
+### 核心模块
+- `lib/key_rotation.py`: API Key 轮换管理器
+- `lib/balance_checker.py`: 余额查询器
+
+### 使用示例
+
+#### API Key 轮换
+```python
+from lib.key_rotation import KeyRotationManager
+
+manager = KeyRotationManager()
+
+# 添加多个 Key
+manager.add_keys('openai', ['sk-key-1', 'sk-key-2', 'sk-key-3'])
+
+# 获取当前 Key
+current = manager.get_current_key('openai')
+
+# 模拟 rate-limit 错误，自动轮换
+manager.rotate_key('openai', 'rate_limit')
+
+# 查看统计
+stats = manager.get_key_stats('openai')
+```
+
+#### 余额查询
+```python
+from lib.balance_checker import BalanceChecker
+
+checker = BalanceChecker()
+
+# 查询 OpenAI 余额
+result = checker.check_openai('sk-xxx')
+print(checker.format_balance_result(result))
+
+# 查询 Anthropic 余额
+result = checker.check_anthropic('sk-xxx')
+print(checker.format_balance_result(result))
+```
+
