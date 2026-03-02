@@ -280,34 +280,6 @@ class ClawAPIConfigManager:
                 'error': str(e)
             }
     
-    def validate_config(self) -> Dict:
-        """验证配置完整性"""
-        config = self._load_config()
-        issues = []
-        
-        # 检查 primary model
-        primary = self.get_primary_model()
-        if primary == '(not set)':
-            issues.append("Primary model not set")
-        
-        # 检查 providers
-        providers = config.get('models', {}).get('providers', {})
-        if not providers:
-            issues.append("No providers configured")
-        
-        for name, provider in providers.items():
-            if not provider.get('apiKey'):
-                issues.append(f"Provider '{name}' missing API key")
-            if not provider.get('models'):
-                issues.append(f"Provider '{name}' has no models")
-        
-        return {
-            'valid': len(issues) == 0,
-            'issues': issues
-        }
-    
-    # ========== 备份 & 恢复 ==========
-    
     def list_backups(self) -> List[Dict]:
         """列出所有备份"""
         backups = sorted(self.backup_dir.glob("openclaw_*.json"), reverse=True)
@@ -504,6 +476,71 @@ class ClawAPIConfigManager:
 
 
 
+    def validate_config(self):
+        """验证配置文件"""
+        config = self._load_config()
+        issues = []
+        
+        # 检查默认模型配置
+        default_model = config.get('agents', {}).get('defaults', {}).get('model')
+        if default_model and isinstance(default_model, str):
+            if '/' in default_model:
+                parts = default_model.split('/')
+                if len(parts) > 2 or ':' in default_model:
+                    issues.append({
+                        'type': 'invalid_default_model',
+                        'current': default_model,
+                        'fix': 'Should be: provider/model-id'
+                    })
+        
+        # 检查根级别的无效 key
+        invalid_root_keys = ['model']
+        for key in invalid_root_keys:
+            if key in config:
+                issues.append({
+                    'type': 'invalid_root_key',
+                    'key': key,
+                    'value': config[key],
+                    'fix': f'Move to agents.defaults.{key}'
+                })
+        
+        return {
+            'valid': len(issues) == 0,
+            'issues': issues
+        }
+    
+    def auto_fix(self):
+        """自动修复常见配置问题"""
+        validation = self.validate_config()
+        if validation['valid']:
+            return {'fixed': 0, 'issues': []}
+        
+        config = self._load_config()
+        fixed = []
+        
+        for issue in validation['issues']:
+            if issue['type'] == 'invalid_default_model':
+                old = issue['current']
+                parts = old.replace(':', '/').split('/')
+                if len(parts) >= 2:
+                    new = f"{parts[-2]}/{parts[-1]}"
+                    if 'agents' not in config:
+                        config['agents'] = {}
+                    if 'defaults' not in config['agents']:
+                        config['agents']['defaults'] = {}
+                    config['agents']['defaults']['model'] = new
+                    fixed.append(f"Fixed default model: {old} → {new}")
+            
+            elif issue['type'] == 'invalid_root_key':
+                del config[issue['key']]
+                fixed.append(f"Removed invalid root key: {issue['key']}")
+        
+        if fixed:
+            self._save_config(config)
+        
+        return {'fixed': len(fixed), 'issues': fixed}
+
+
 def main():
     """CLI 入口"""
     import sys
@@ -513,3 +550,76 @@ def main():
         print("\nProvider Management:")
         print("  list-providers              List all providers")
         print("  add-provider <name> <url> <key>")
+
+    def validate_config(self) -> dict:
+        """验证配置文件"""
+        config = self._load_config()
+        issues = []
+        
+        # 检查模型 ID 格式
+        providers = config.get('models', {}).get('providers', {})
+        for name, provider in providers.items():
+            for model in provider.get('models', []):
+                model_id = model.get('id', '')
+                # 检查是否有错误的前缀
+                if '/' in model_id and model_id.count('/') > 1:
+                    issues.append({
+                        'type': 'invalid_model_id',
+                        'provider': name,
+                        'model': model_id,
+                        'fix': f'{name}/{model_id.split("/")[-1]}'
+                    })
+        
+        # 检查默认模型配置
+        default_model = config.get('agents', {}).get('defaults', {}).get('model')
+        if default_model and '/' in default_model:
+            parts = default_model.split('/')
+            if len(parts) > 2 or ':' in default_model:
+                issues.append({
+                    'type': 'invalid_default_model',
+                    'current': default_model,
+                    'fix': 'Should be: provider/model-id'
+                })
+        
+        # 检查根级别的无效 key
+        invalid_root_keys = ['model']
+        for key in invalid_root_keys:
+            if key in config:
+                issues.append({
+                    'type': 'invalid_root_key',
+                    'key': key,
+                    'value': config[key],
+                    'fix': f'Move to agents.defaults.{key}'
+                })
+        
+        return {
+            'valid': len(issues) == 0,
+            'issues': issues
+        }
+    
+    def auto_fix(self) -> dict:
+        """自动修复常见配置问题"""
+        validation = self.validate_config()
+        if validation['valid']:
+            return {'fixed': 0, 'issues': []}
+        
+        config = self._load_config()
+        fixed = []
+        
+        for issue in validation['issues']:
+            if issue['type'] == 'invalid_default_model':
+                old = issue['current']
+                parts = old.replace(':', '/').split('/')
+                if len(parts) >= 2:
+                    new = f"{parts[-2]}/{parts[-1]}"
+                    config['agents']['defaults']['model'] = new
+                    fixed.append(f"Fixed default model: {old} → {new}")
+            
+            elif issue['type'] == 'invalid_root_key':
+                del config[issue['key']]
+                fixed.append(f"Removed invalid root key: {issue['key']}")
+        
+        if fixed:
+            self._save_config(config)
+        
+        return {'fixed': len(fixed), 'issues': fixed}
