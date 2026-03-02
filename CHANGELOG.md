@@ -122,3 +122,28 @@ result = checker.check_anthropic('sk-xxx')
 print(checker.format_balance_result(result))
 ```
 
+
+## v1.4.1 (2026-03-03)
+
+### Bug 修复
+- ✅ 修复内置 Provider 模板中的协议配置
+  - `openai-chat` → `openai-responses`（OpenAI、OpenRouter、Groq）
+  - `openai-compatible` → `openai-responses` / `ollama`
+  - 统一使用 `baseUrl`（小写 U）而不是 `baseURL`
+
+### 新增
+- ✅ 添加火山引擎（VolcEngine）内置 Provider
+  - 协议：anthropic-messages（兼容 Anthropic 接口）
+  - 模型：doubao-seed-2.0-code
+
+### 支持的协议
+OpenClaw 支持的有效协议：
+- `openai-completions`
+- `openai-responses`
+- `openai-codex-responses`
+- `anthropic-messages`
+- `google-generative-ai`
+- `github-copilot`
+- `bedrock-converse-stream`
+- `ollama`
+

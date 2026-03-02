@@ -7,8 +7,8 @@ Built-in Provider Templates
 BUILTIN_PROVIDERS = {
     'openai': {
         'name': 'OpenAI',
-        'baseURL': 'https://api.openai.com/v1',
-        'api': 'openai-chat',
+        'baseUrl': 'https://api.openai.com/v1',
+        'api': 'openai-responses',  # ← 修复：使用有效协议
         'models': [
             {'id': 'gpt-4', 'name': 'GPT-4'},
             {'id': 'gpt-4-turbo', 'name': 'GPT-4 Turbo'},
@@ -18,7 +18,7 @@ BUILTIN_PROVIDERS = {
     },
     'anthropic': {
         'name': 'Anthropic',
-        'baseURL': 'https://api.anthropic.com',
+        'baseUrl': 'https://api.anthropic.com',
         'api': 'anthropic-messages',
         'models': [
             {'id': 'claude-opus-4-6', 'name': 'Claude Opus 4.6'},
@@ -29,8 +29,8 @@ BUILTIN_PROVIDERS = {
     },
     'openrouter': {
         'name': 'OpenRouter',
-        'baseURL': 'https://openrouter.ai/api/v1',
-        'api': 'openai-compatible',
+        'baseUrl': 'https://openrouter.ai/api/v1',
+        'api': 'openai-responses',  # ← 修复：使用有效协议
         'models': [
             {'id': 'anthropic/claude-opus-4-6', 'name': 'Claude Opus 4.6'},
             {'id': 'openai/gpt-4-turbo', 'name': 'GPT-4 Turbo'},
@@ -40,7 +40,7 @@ BUILTIN_PROVIDERS = {
     },
     'google': {
         'name': 'Google Gemini',
-        'baseURL': 'https://generativelanguage.googleapis.com/v1beta',
+        'baseUrl': 'https://generativelanguage.googleapis.com/v1beta',
         'api': 'google-generative-ai',
         'models': [
             {'id': 'gemini-3-pro-preview', 'name': 'Gemini 3 Pro'},
@@ -50,7 +50,7 @@ BUILTIN_PROVIDERS = {
     },
     'moonshot': {
         'name': 'Moonshot AI (Kimi)',
-        'baseURL': 'https://api.moonshot.ai/v1',
+        'baseUrl': 'https://api.moonshot.ai/v1',
         'api': 'openai-completions',
         'models': [
             {'id': 'kimi-k2.5', 'name': 'Kimi K2.5'},
@@ -60,8 +60,8 @@ BUILTIN_PROVIDERS = {
     },
     'ollama': {
         'name': 'Ollama (Local)',
-        'baseURL': 'http://127.0.0.1:11434/v1',
-        'api': 'openai-compatible',
+        'baseUrl': 'http://127.0.0.1:11434/v1',
+        'api': 'ollama',  # ← 修复：使用 ollama 协议
         'models': [
             {'id': 'llama3.3', 'name': 'Llama 3.3'},
             {'id': 'qwen2.5-coder', 'name': 'Qwen 2.5 Coder'}
@@ -70,8 +70,8 @@ BUILTIN_PROVIDERS = {
     },
     'groq': {
         'name': 'Groq',
-        'baseURL': 'https://api.groq.com/openai/v1',
-        'api': 'openai-compatible',
+        'baseUrl': 'https://api.groq.com/openai/v1',
+        'api': 'openai-responses',  # ← 修复：使用有效协议
         'models': [
             {'id': 'llama-3.3-70b-versatile', 'name': 'Llama 3.3 70B'},
             {'id': 'mixtral-8x7b-32768', 'name': 'Mixtral 8x7B'}
@@ -80,13 +80,22 @@ BUILTIN_PROVIDERS = {
     },
     'deepseek': {
         'name': 'DeepSeek',
-        'baseURL': 'https://api.deepseek.com/v1',
-        'api': 'openai-compatible',
+        'baseUrl': 'https://api.deepseek.com/v1',
+        'api': 'openai-responses',  # ← 修复：使用有效协议
         'models': [
             {'id': 'deepseek-chat', 'name': 'DeepSeek Chat'},
             {'id': 'deepseek-coder', 'name': 'DeepSeek Coder'}
         ],
         'env_key': 'DEEPSEEK_API_KEY'
+    },
+    'volcengine': {
+        'name': 'VolcEngine (火山引擎)',
+        'baseUrl': 'https://ark.cn-beijing.volces.com/api/coding',
+        'api': 'anthropic-messages',  # ← 兼容 Anthropic 接口协议
+        'models': [
+            {'id': 'doubao-seed-2.0-code', 'name': 'Doubao Seed 2.0 Code'}
+        ],
+        'env_key': 'VOLCENGINE_API_KEY'
     }
 }
 
