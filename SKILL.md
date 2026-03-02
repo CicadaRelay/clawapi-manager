@@ -1,3 +1,17 @@
+---
+name: ClawAPI Manager
+slug: clawapi-manager
+version: 1.1.0
+author: 2233admin
+description: OpenClaw-native API management and cost optimization. Multi-provider key management, real-time monitoring, smart routing, and automated failover.
+tags:
+  - api-management
+  - cost-optimization
+  - monitoring
+  - key-rotation
+  - multi-provider
+---
+
 # ClawAPI Manager
 
 An OpenClaw-native API management and cost optimization skill. Provides comprehensive API key management, real-time monitoring, smart routing, and cost savings through OpenRouter integration.
