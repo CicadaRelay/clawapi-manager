@@ -64,10 +64,10 @@ class ClawAPIConfigManager:
         for name, provider in providers.items():
             result.append({
                 'name': name,
-                'base_url': provider.get('baseURL', ''),
+                'base_url': provider.get('baseUrl', ''),  # ← 修复：使用 baseUrl
                 'api_key': provider.get('apiKey', '')[:8] + '...' if provider.get('apiKey') else '(not set)',
                 'model_count': len(provider.get('models', [])),
-                'protocol': provider.get('api', 'openai-compatible')  # ← 新增：协议类型
+                'protocol': provider.get('api', 'openai-compatible')
             })
         
         return result
@@ -86,9 +86,9 @@ class ClawAPIConfigManager:
             raise ValueError(f"Provider '{name}' already exists")
         
         config['models']['providers'][name] = {
-            'baseURL': base_url,
+            'baseUrl': base_url,  # ← 修复：使用 baseUrl（小写 U）
             'apiKey': api_key,
-            'api': protocol,  # ← 新增：协议类型
+            'api': protocol,
             'models': models or []
         }
         
