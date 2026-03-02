@@ -15,7 +15,7 @@ DATA_DIR = os.path.join(PARENT_DIR, 'data')
 CONFIG_FILE = os.path.join(DATA_DIR, 'openrouter.json')
 
 # OpenRouter API
-API_KEY = "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"
+API_KEY = os.getenv('OPENROUTER_API_KEY', '')
 API_BASE = "https://openrouter.ai/api/v1"
 
 # 免费/低成本模型

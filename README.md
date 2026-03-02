@@ -1,98 +1,152 @@
-# API Cockpit
+# ClawAPI Manager
 
-自动化运维与 API Key 管理集成包。
+Professional API management and cost optimization for OpenClaw deployments.
 
-## 项目结构
+## What It Does
 
-```
-api-cockpit/
-├── config/
-│   └── .env.example          # 配置模板
-├── lib/
-│   ├── antigravity.py        # Antigravity 适配器
-│   ├── codex.py              # Codex 适配器
-│   ├── copilot.py            # Copilot 适配器
-│   └── windsurf.py           # Windsurf 适配器
-├── logs/                      # 日志目录（自动创建）
-├── check_quota.sh            # 统一配额查询入口
-├── auto_rotate.sh            # 自动轮换脚本
-├── cockpit-admin.sh          # 多节点运维脚本
-├── cron.example              # 定时任务配置示例
-└── SKILL.md                  # Skill 文档
-```
+Manages API keys, monitors costs, and routes tasks to the most cost-effective models automatically. Saves 30-90% on API costs through intelligent routing and free model integration.
 
-## 功能模块
+## Key Features
 
-### 1. cockpit-tools（API Key 管理）
+- **Smart Routing**: Automatically routes simple tasks to free models (Qwen, Llama) via OpenRouter
+- **Cost Tracking**: Real-time monitoring of API usage and spending
+- **Multi-Provider**: Supports OpenAI, Anthropic, Google, and 40+ providers
+- **Budget Alerts**: Get notified before you exceed spending limits
+- **Key Health**: Automatic detection of expired or rate-limited keys
+- **Multi-Channel Alerts**: Telegram, Discord, Slack, Feishu, QQ, DingTalk
 
-**配置：**
-```bash
-cd /root/.openclaw/workspace/skills/api-cockpit
-cp config/.env.example config/.env
-# 编辑 config/.env，填入你的 API Key
-```
-
-**查询配额：**
-```bash
-./check_quota.sh
-```
-
-**自动轮换：**
-```bash
-./auto_rotate.sh
-```
-
-### 2. cockpit-admin（多节点运维）
-
-**健康检查：**
-```bash
-./cockpit-admin.sh health
-```
-
-**检查特定节点：**
-```bash
-./cockpit-admin.sh status central
-./cockpit-admin.sh status silicon
-./cockpit-admin.sh status tokyo
-```
-
-**重启网关：**
-```bash
-./cockpit-admin.sh restart central
-```
-
-**同步技能：**
-```bash
-./cockpit-admin.sh sync
-```
-
-## 定时任务
-
-复制 `cron.example` 到 `/etc/cron.d/api-cockpit` 启用自动监控：
+## Quick Start
 
 ```bash
-cp cron.example /etc/cron.d/api-cockpit
-systemctl reload cron
+# Install
+cd ~/.openclaw/workspace/skills
+git clone https://github.com/2233admin/clawapi-manager.git
+cd clawapi-manager
+pip install -r requirements.txt
+
+# Configure notifications (optional)
+cp config/notify.json.example config/notify.json
+# Edit with your webhook URLs
+
+# Test
+python3 lib/cost_monitor.py health
 ```
 
-## 节点列表
+## How It Saves Money
 
-| 节点 | IP | 角色 |
-|------|-----|------|
-| 中央 | 43.163.225.27 | Gateway 主节点 |
-| 硅谷 | 170.106.73.160 | 重型计算（本机） |
-| 东京 | 43.167.192.145 | 轻量并发 |
+The system analyzes each task and routes it intelligently:
 
-## 告警阈值
+- **Simple tasks** (search, weather, translate) → Free models (100% savings)
+- **Medium tasks** (summaries, basic code) → Cost-effective models (50-70% savings)
+- **Complex tasks** (architecture, analysis) → Premium models (Opus, GPT-4)
 
-- **警告**：80% 配额使用
-- **严重**：95% 配额使用（触发自动轮换）
-- **CPU/内存**：90% 触发告警
+### Example Savings
 
-## Telegram 告警
+| Task Type | Before | After | Savings |
+|-----------|--------|-------|---------|
+| Weather check | $0.015 | $0.00 | 100% |
+| Code review | $0.30 | $0.10 | 67% |
+| Architecture design | $1.50 | $1.50 | 0% |
 
-在 `config/.env` 中配置：
-```env
-TELEGRAM_BOT_TOKEN=your_bot_token
-TELEGRAM_CHAT_ID=your_chat_id
+**Average savings: 30-90%** depending on your task mix.
+
+## Configuration
+
+### OpenRouter (Optional, for free models)
+
+Add your OpenRouter key to `config/openrouter.json`:
+
+```json
+{
+  "api_key": "sk-or-v1-YOUR_KEY_HERE"
+}
 ```
+
+Get a free key at [openrouter.ai](https://openrouter.ai)
+
+### Notifications
+
+Edit `config/notify.json`:
+
+```json
+{
+  "telegram": {
+    "enabled": true,
+    "bot_token": "YOUR_BOT_TOKEN",
+    "chat_id": "YOUR_CHAT_ID"
+  }
+}
+```
+
+## Usage
+
+```bash
+# Check system health
+python3 lib/cost_monitor.py health
+
+# Generate cost report
+python3 lib/daily_report.py
+
+# Route a task (returns recommended model)
+python3 lib/task_delegation.py route "search weather in Tokyo"
+
+# Check key health
+python3 lib/key_health.py status
+
+# Test notifications
+python3 lib/notifier.py test
+```
+
+## Automation
+
+Add to cron for automated monitoring:
+
+```cron
+# Daily cost report at 1 AM
+0 1 * * * cd /path/to/clawapi-manager && python3 lib/daily_report.py
+
+# Health check every 15 minutes
+*/15 * * * * cd /path/to/clawapi-manager && python3 lib/cost_monitor.py health
+```
+
+## Architecture
+
+```
+ClawAPI Manager
+├── lib/                    # Core modules
+│   ├── cost_monitor.py     # Cost tracking
+│   ├── task_delegation.py  # Smart routing
+│   ├── notifier.py         # Alerts
+│   ├── budget_alert.py     # Budget monitoring
+│   └── key_health.py       # Key health checks
+├── config/                 # Configuration
+└── data/                   # Runtime data
+```
+
+## Requirements
+
+- Python 3.8+
+- OpenClaw (any recent version)
+- Optional: OpenRouter API key (for free model routing)
+
+## Security
+
+- API keys are encrypted at rest (AES-256)
+- Never commit keys to version control
+- Use environment variables for production
+- Review config examples before deployment
+
+## License
+
+MIT License - Free for personal and commercial use.
+
+## Links
+
+- [OpenClaw](https://github.com/openclaw/openclaw)
+- [OpenRouter](https://openrouter.ai)
+- [ClawHub](https://clawhub.com)
+
+---
+
+**Version**: 1.0.1  
+**Last Updated**: 2026-03-02
