@@ -7,10 +7,12 @@
 | 错误码 | 原因 | 解决方案 |
 |--------|------|----------|
 | **401** | API Key 不正确 | 前往模型提供商检查写入的 API Key 是否正确 |
-| **429/500** | 余额不足 | 充钱或检查 API Key 是否正确 |
-| **rate_limit** | 速率限制 | 更换提供商，或联系提供商获取更大配额 |
-| **404** | Base URL 不对 | 查看提供商文档寻找兼容 OpenAI Chat Completions API 或 Anthropic Messages API 的 base URL 地址 |
 | **403** | 该模型不支持此服务器地域 | 更换服务器地域为模型支持的地域或更换模型 |
+| **404** | Base URL 不对 | 查看提供商文档寻找兼容 OpenAI Chat Completions API 或 Anthropic Messages API 的 base URL 地址 |
+| **429** | 速率限制 (Rate Limit) | 更换提供商，或联系提供商获取更大配额 |
+| **500** | 服务器内部错误 | 1. 余额不足，充值或检查 API Key<br>2. 提供商服务异常，稍后重试<br>3. 请求参数错误，检查模型配置 |
+| **503** | 服务不可用 | 1. 提供商服务器维护或过载<br>2. 网络连接问题<br>3. 切换到 Fallback 模型<br>4. 稍后重试 |
+| **rate_limit** | 速率限制 | 更换提供商，或联系提供商获取更大配额 |
 
 ---
 
@@ -120,3 +122,93 @@ python3 clawapi-tui.py
 - GitHub Issues: https://github.com/2233admin/clawapi-manager/issues
 - OpenClaw Discord: https://discord.com/invite/clawd
 - ClawHub: https://clawhub.com
+
+---
+
+## 错误码详解
+
+### 500 Internal Server Error
+
+**常见原因：**
+1. **余额不足**：API Key 对应账户余额为 0
+2. **服务器异常**：提供商服务器内部错误
+3. **请求参数错误**：模型 ID、参数配置不正确
+4. **超时**：请求处理时间过长
+
+**排查步骤：**
+```bash
+# 1. 检查余额
+# 登录提供商控制台查看余额
+
+# 2. 检查 API Key
+python3 -c "from clawapi_helper import *; print(show_providers())"
+
+# 3. 测试连通性
+./clawapi test provider_name
+
+# 4. 查看日志
+tail -f ~/.openclaw/logs/gateway.log
+```
+
+**解决方案：**
+- 充值余额
+- 更换 API Key
+- 检查模型配置
+- 切换到 Fallback 模型
+
+---
+
+### 503 Service Unavailable
+
+**常见原因：**
+1. **服务器维护**：提供商正在维护
+2. **服务器过载**：请求量过大，服务器无法处理
+3. **网络问题**：网络连接不稳定
+4. **地域限制**：服务器地域不支持
+
+**排查步骤：**
+```bash
+# 1. 检查网络连通性
+curl -I https://api.provider.com
+
+# 2. 查看提供商状态页
+# 访问提供商官网查看服务状态
+
+# 3. 测试其他 provider
+./clawapi providers
+./clawapi test another_provider
+
+# 4. 检查 Fallback 配置
+python3 -c "from clawapi_helper import *; print(show_status())"
+```
+
+**解决方案：**
+- 等待服务恢复（通常 5-30 分钟）
+- 切换到其他 provider
+- 配置 Fallback 链自动切换
+- 更换服务器地域
+
+---
+
+### 自动 Fallback 配置
+
+当主模型返回 500/503 错误时，自动切换到备用模型：
+
+```bash
+# 查看当前 Fallback 链
+python3 -c "from clawapi_helper import *; print(show_status())"
+
+# 添加 Fallback
+python3 -c "from clawapi_helper import *; manager.add_fallback('provider/model-id')"
+
+# 示例：配置三层 Fallback
+# 主模型：aiclauder/claude-opus-4-6
+# Fallback 1：volcengine/doubao-seed-2.0-code
+# Fallback 2：openrouter/qwen-2.5-coder-32b-instruct:free
+```
+
+**推荐配置：**
+- 主模型：高性能付费模型
+- Fallback 1：中等性能付费模型
+- Fallback 2：免费模型（保底）
+
