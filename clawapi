@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""
+clawapi - ClawAPI Manager 统一 CLI
+"""
+
+import sys
+import os
+
+# 添加 lib 目录到路径
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))
+
+from config_manager import ClawAPIConfigManager
+
+def main():
+    if len(sys.argv) < 2:
+        print("""
+╔══════════════════════════════════════╗
+║  ClawAPI Manager - Unified CLI       ║
+╚══════════════════════════════════════╝
+
+📋 Configuration Management:
+  clawapi status                    Show full status
+  clawapi providers                 List all providers
+  clawapi models [provider]         List models
+  clawapi primary                   Show primary model
+  clawapi fallbacks                 Show fallback chain
+
+🔧 Provider Operations:
+  clawapi add-provider <name> <url> <key>
+  clawapi remove-provider <name>
+  clawapi update-key <provider> <key>
+
+🎯 Model Operations:
+  clawapi add-model <provider> <id> <name>
+  clawapi remove-model <provider> <id>
+  clawapi set-primary <model_id>
+  clawapi add-fallback <model_id>
+  clawapi remove-fallback <model_id>
+
+🧪 Testing:
+  clawapi test <provider>           Test provider connection
+  clawapi validate                  Validate configuration
+
+💾 Backup:
+  clawapi backups                   List all backups
+  clawapi restore <filename>        Restore from backup
+
+Examples:
+  clawapi status
+  clawapi providers
+  clawapi set-primary aiclauder/claude-opus-4-6
+  clawapi add-fallback minimax/MiniMax-M2.5
+""")
+        return
+    
+    manager = ClawAPIConfigManager()
+    cmd = sys.argv[1]
+    
+    # 命令别名
+    aliases = {
+        'providers': 'list-providers',
+        'models': 'list-models',
+        'primary': 'get-primary',
+        'fallbacks': 'get-fallbacks',
+        'backups': 'list-backups'
+    }
+    
+    if cmd in aliases:
+        cmd = aliases[cmd]
+    
+    # 重新构造参数
+    sys.argv[1] = cmd
+    
+    # 调用 config_manager
+    from config_manager import main as config_main
+    config_main()
+
+if __name__ == '__main__':
+    main()
