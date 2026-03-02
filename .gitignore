@@ -46,3 +46,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+# 敏感配置文件
+config/managed_keys_*.json
+config/openrouter_keys.json
+config/*_keys.json

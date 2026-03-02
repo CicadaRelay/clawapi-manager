@@ -1,0 +1,15 @@
+{
+  "server": "central",
+  "managed_at": "2026-03-03T04:29:00+08:00",
+  "providers": {
+    "example-provider": {
+      "baseUrl": "https://api.example.com",
+      "apiKey": "sk-your-api-key-here",
+      "api": "anthropic-messages",
+      "models": [
+        "model-id-1",
+        "model-id-2"
+      ]
+    }
+  }
+}

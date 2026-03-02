@@ -1,0 +1,21 @@
+{
+  "provider": "openrouter",
+  "keys": [
+    {
+      "key": "sk-or-v1-your-key-here",
+      "name": "openrouter-1",
+      "priority": 1,
+      "enabled": true
+    },
+    {
+      "key": "sk-or-v1-your-key-2-here",
+      "name": "openrouter-2",
+      "priority": 2,
+      "enabled": true
+    }
+  ],
+  "rotation_strategy": "round-robin",
+  "health_check_interval": 300,
+  "auto_failover": true,
+  "retry_on_429": true
+}
