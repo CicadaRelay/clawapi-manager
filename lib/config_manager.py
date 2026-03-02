@@ -66,13 +66,14 @@ class ClawAPIConfigManager:
                 'name': name,
                 'base_url': provider.get('baseURL', ''),
                 'api_key': provider.get('apiKey', '')[:8] + '...' if provider.get('apiKey') else '(not set)',
-                'model_count': len(provider.get('models', []))
+                'model_count': len(provider.get('models', [])),
+                'protocol': provider.get('api', 'openai-compatible')  # ← 新增：协议类型
             })
         
         return result
     
     def add_provider(self, name: str, base_url: str, api_key: str, 
-                    models: List[Dict] = None):
+                    models: List[Dict] = None, protocol: str = 'openai-compatible'):
         """添加新的 provider"""
         config = self._load_config()
         
@@ -87,6 +88,7 @@ class ClawAPIConfigManager:
         config['models']['providers'][name] = {
             'baseURL': base_url,
             'apiKey': api_key,
+            'api': protocol,  # ← 新增：协议类型
             'models': models or []
         }
         
@@ -438,6 +440,66 @@ class ClawAPIConfigManager:
         
         self._save_config(config)
         return not current
+    
+    # ========== 协议管理 ==========
+    
+    SUPPORTED_PROTOCOLS = {
+        'anthropic-messages': {
+            'name': 'Anthropic Messages API',
+            'endpoint': '/v1/messages',
+            'auth_header': 'x-api-key',
+            'description': 'Claude API (Anthropic)'
+        },
+        'openai-chat': {
+            'name': 'OpenAI Chat Completions',
+            'endpoint': '/v1/chat/completions',
+            'auth_header': 'Authorization',
+            'description': 'OpenAI GPT API'
+        },
+        'openai-compatible': {
+            'name': 'OpenAI Compatible',
+            'endpoint': '/v1/chat/completions',
+            'auth_header': 'Authorization',
+            'description': 'OpenAI-compatible API (default)'
+        }
+    }
+    
+    def get_provider_protocol(self, provider_name: str) -> str:
+        """获取 provider 的协议类型"""
+        config = self._load_config()
+        providers = config.get('models', {}).get('providers', {})
+        
+        if provider_name not in providers:
+            raise ValueError(f"Provider '{provider_name}' not found")
+        
+        # 优先读取配置中的 api 字段
+        return providers[provider_name].get('api', 'openai-compatible')
+    
+    def set_provider_protocol(self, provider_name: str, protocol: str):
+        """设置 provider 的协议类型"""
+        if protocol not in self.SUPPORTED_PROTOCOLS:
+            raise ValueError(f"Unsupported protocol: {protocol}. Supported: {list(self.SUPPORTED_PROTOCOLS.keys())}")
+        
+        config = self._load_config()
+        providers = config.get('models', {}).get('providers', {})
+        
+        if provider_name not in providers:
+            raise ValueError(f"Provider '{provider_name}' not found")
+        
+        providers[provider_name]['api'] = protocol
+        self._save_config(config)
+        return True
+    
+    def list_protocols(self) -> List[Dict]:
+        """列出所有支持的协议"""
+        return [
+            {
+                'id': protocol_id,
+                'name': info['name'],
+                'description': info['description']
+            }
+            for protocol_id, info in self.SUPPORTED_PROTOCOLS.items()
+        ]
 
 
 
@@ -451,121 +513,3 @@ def main():
         print("\nProvider Management:")
         print("  list-providers              List all providers")
         print("  add-provider <name> <url> <key>")
-        print("  remove-provider <name>")
-        print("  update-key <provider> <new_key>")
-        print("\nModel Management:")
-        print("  list-models [provider]      List models")
-        print("  add-model <provider> <id> <name>")
-        print("  remove-model <provider> <id>")
-        print("\nPrimary & Fallback:")
-        print("  get-primary                 Show primary model")
-        print("  set-primary <model_id>")
-        print("  get-fallbacks               Show fallback chain")
-        print("  add-fallback <model_id>")
-        print("  remove-fallback <model_id>")
-        print("\nTesting:")
-        print("  test <provider>             Test provider connection")
-        print("  validate                    Validate configuration")
-        print("\nBackup:")
-        print("  list-backups                List all backups")
-        print("  restore <filename>          Restore from backup")
-        print("\nStatus:")
-        print("  status                      Show full status")
-        return
-    
-    manager = ClawAPIConfigManager()
-    cmd = sys.argv[1]
-    
-    try:
-        if cmd == 'list-providers':
-            for p in manager.list_providers():
-                print(f"{p['name']}: {p['model_count']} models, key: {p['api_key']}")
-        
-        elif cmd == 'add-provider':
-            name, url, key = sys.argv[2], sys.argv[3], sys.argv[4]
-            manager.add_provider(name, url, key)
-            print(f"✅ Provider '{name}' added")
-        
-        elif cmd == 'remove-provider':
-            manager.remove_provider(sys.argv[2])
-            print(f"✅ Provider removed")
-        
-        elif cmd == 'update-key':
-            provider, key = sys.argv[2], sys.argv[3]
-            manager.update_api_key(provider, key)
-            print(f"✅ API key updated")
-        
-        elif cmd == 'list-models':
-            provider = sys.argv[2] if len(sys.argv) > 2 else None
-            for m in manager.list_models(provider):
-                print(f"{m['full_id']}: {m['name']}")
-        
-        elif cmd == 'add-model':
-            provider, model_id, name = sys.argv[2], sys.argv[3], sys.argv[4]
-            manager.add_model(provider, model_id, name)
-            print(f"✅ Model added")
-        
-        elif cmd == 'remove-model':
-            provider, model_id = sys.argv[2], sys.argv[3]
-            manager.remove_model(provider, model_id)
-            print(f"✅ Model removed")
-        
-        elif cmd == 'get-primary':
-            print(manager.get_primary_model())
-        
-        elif cmd == 'set-primary':
-            manager.set_primary_model(sys.argv[2])
-            print(f"✅ Primary model set")
-        
-        elif cmd == 'get-fallbacks':
-            for fb in manager.get_fallbacks():
-                print(fb)
-        
-        elif cmd == 'add-fallback':
-            manager.add_fallback(sys.argv[2])
-            print(f"✅ Fallback added")
-        
-        elif cmd == 'remove-fallback':
-            manager.remove_fallback(sys.argv[2])
-            print(f"✅ Fallback removed")
-        
-        elif cmd == 'test':
-            result = manager.test_provider(sys.argv[2])
-            if result['success']:
-                print(f"✅ Provider OK")
-            else:
-                print(f"❌ Failed: {result.get('error', result.get('message'))}")
-        
-        elif cmd == 'validate':
-            result = manager.validate_config()
-            if result['valid']:
-                print("✅ Configuration valid")
-            else:
-                print("⚠️  Issues:")
-                for issue in result['issues']:
-                    print(f"  - {issue}")
-        
-        elif cmd == 'list-backups':
-            for backup in manager.list_backups():
-                print(f"{backup['filename']}: {backup['created']}")
-        
-        elif cmd == 'restore':
-            manager.restore_backup(sys.argv[2])
-            print(f"✅ Backup restored")
-        
-        elif cmd == 'status':
-            manager.show_status()
-        
-        else:
-            print(f"❌ Unknown command: {cmd}")
-            sys.exit(1)
-    
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        sys.exit(1)
-
-
-if __name__ == '__main__':
-    main()
-
-    

@@ -42,7 +42,8 @@ def show_providers():
     
     output = "**API Providers**\n\n"
     for p in providers:
-        output += f"• {p['name']}: {p['model_count']} 个模型, Key: {p['api_key']}\n"
+        protocol = p.get('protocol', 'openai-compatible')
+        output += f"• {p['name']} ({protocol}): {p['model_count']} 个模型, Key: {p['api_key']}\n"
     
     return output
 
@@ -70,11 +71,11 @@ def show_models(provider_name=None):
     
     return output
 
-def add_provider_interactive(name, url, key):
+def add_provider_interactive(name, url, key, protocol='openai-compatible'):
     """添加 provider"""
     try:
-        manager.add_provider(name, url, key)
-        return f"✅ Provider '{name}' 已添加"
+        manager.add_provider(name, url, key, protocol=protocol)
+        return f"✅ Provider '{name}' 已添加 (协议: {protocol})"
     except Exception as e:
         return f"❌ 错误：{e}"
 
@@ -121,3 +122,36 @@ if __name__ == "__main__":
     print(show_status())
     print("\n" + show_providers())
     print("\n" + show_channels())
+
+def show_protocols():
+    """显示所有支持的协议"""
+    protocols = manager.list_protocols()
+    
+    output = "**支持的协议**\n\n"
+    for p in protocols:
+        output += f"• {p['id']}: {p['name']}\n  {p['description']}\n\n"
+    
+    return output
+
+def set_protocol_interactive(provider_name, protocol):
+    """设置 provider 的协议"""
+    try:
+        manager.set_provider_protocol(provider_name, protocol)
+        return f"✅ Provider '{provider_name}' 协议已设置为 {protocol}"
+    except Exception as e:
+        return f"❌ 错误：{e}"
+
+# 更新导出列表
+__all__ = [
+    'show_status',
+    'show_providers',
+    'show_channels',
+    'show_models',
+    'show_protocols',
+    'add_provider_interactive',
+    'set_primary_interactive',
+    'add_channel_interactive',
+    'toggle_channel_interactive',
+    'set_protocol_interactive',
+    'manager'
+]
