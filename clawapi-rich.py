@@ -10,10 +10,14 @@ from rich.panel import Panel
 from rich.layout import Layout
 from rich.prompt import Prompt, Confirm
 from rich.live import Live
+from rich.text import Text
+from rich.align import Align
+from rich.columns import Columns
 from rich import box
 import sys
 import os
 import time
+import itertools
 
 # 添加 lib 目录
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))
@@ -22,21 +26,132 @@ from config_manager import FreeClawConfigManager
 
 console = Console()
 
+# ASCII art logo — 逐行渐入动画
+LOGO_LINES = [
+    "  ______              _____ _                 ",
+    " |  ____|            / ____| |                ",
+    " | |__ _ __ ___  ___| |    | | __ ___      __ ",
+    " |  __| '__/ _ \\/ _ \\ |    | |/ _` \\ \\ /\\ / / ",
+    " | |  | | |  __/  __/ |____| | (_| |\\ V  V /  ",
+    " |_|  |_|  \\___|\\___|\\_____|_|\\__,_| \\_/\\_/   ",
+]
+
+TAGLINE = "API Hub for 40+ AI Providers"
+
+# 启动时的检查项
+BOOT_CHECKS = [
+    ("Config", "resolve_config_path"),
+    ("Providers", "list_providers"),
+    ("Primary Model", "get_primary_model"),
+    ("Fallback Chain", "get_fallbacks"),
+    ("Router", "smart_router"),
+    ("Circuit Breaker", "circuit_breaker"),
+]
+
+
+def play_intro(manager):
+    """Claude Code 风格启动动画"""
+    console.clear()
+
+    # Phase 1: Logo 逐行渐入
+    for i, line in enumerate(LOGO_LINES):
+        color_idx = min(i, 4)
+        colors = ["bold bright_cyan", "bold cyan", "cyan", "dim cyan", "dim blue"]
+        console.print(f"[{colors[color_idx]}]{line}[/]")
+        time.sleep(0.06)
+
+    # Tagline 打字机效果
+    console.print()
+    typed = Text()
+    typed.append("  ")
+    for ch in TAGLINE:
+        typed.append(ch, style="bold white")
+    console.print(typed)
+    time.sleep(0.15)
+
+    # Phase 2: 启动检查动画
+    console.print()
+    providers = []
+    primary = ""
+    fallbacks = []
+
+    for label, check_id in BOOT_CHECKS:
+        # 显示 spinner 风格的检查
+        console.print(f"  [dim]>[/dim] [dim]{label}...[/dim]", end="")
+        time.sleep(0.08)
+
+        # 实际执行检查
+        ok = True
+        detail = ""
+        if check_id == "resolve_config_path":
+            from constants import resolve_config_path
+            p = resolve_config_path()
+            detail = str(p.name)
+        elif check_id == "list_providers":
+            providers = manager.list_providers()
+            detail = f"{len(providers)} loaded"
+        elif check_id == "get_primary_model":
+            primary = manager.get_primary_model()
+            detail = primary if primary else "(not set)"
+        elif check_id == "get_fallbacks":
+            fallbacks = manager.get_fallbacks()
+            detail = f"{len(fallbacks)} models"
+        elif check_id == "smart_router":
+            try:
+                from smart_router import load_config
+                load_config()
+                detail = "ready"
+            except Exception:
+                detail = "offline"
+                ok = False
+        elif check_id == "circuit_breaker":
+            try:
+                from circuit_breaker import CircuitBreaker
+                detail = "ready"
+            except Exception:
+                detail = "offline"
+                ok = False
+
+        # 覆盖行 — 显示结果
+        status = "[green]ok[/green]" if ok else "[yellow]--[/yellow]"
+        console.print(f"\r  {status} [bold]{label}[/bold] [dim]{detail}[/dim]")
+        time.sleep(0.05)
+
+    # Phase 3: 分隔线 + 就绪提示
+    console.print()
+    w = min(console.width, 52)
+    bar = Text("─" * w, style="dim cyan")
+    console.print(bar)
+    console.print()
+
+    # 状态摘要（类似 Claude Code 底部状态）
+    summary_parts = [
+        f"[bold cyan]{len(providers)}[/bold cyan] [dim]providers[/dim]",
+        f"[bold green]{sum(p['model_count'] for p in providers)}[/bold green] [dim]models[/dim]",
+        f"[bold yellow]{len(fallbacks)}[/bold yellow] [dim]fallbacks[/dim]",
+    ]
+    console.print("  " + "  [dim]|[/dim]  ".join(summary_parts))
+    console.print(f"  [dim]primary:[/dim] [bold]{primary}[/bold]")
+    console.print()
+    time.sleep(0.3)
+
+
 class FreeClawRichTUI:
     def __init__(self):
         self.manager = FreeClawConfigManager()
         self.current_tab = "models"
-    
+        self.first_run = True
+
     def show_header(self):
         """显示头部"""
         primary = self.manager.get_primary_model()
         fallbacks = self.manager.get_fallbacks()
         providers = self.manager.list_providers()
-        
-        header = f"""[bold cyan]FreeClaw[/bold cyan]
-[dim]Primary:[/dim] {primary}  |  [dim]Providers:[/dim] {len(providers)}  |  [dim]Fallbacks:[/dim] {len(fallbacks)}"""
-        
-        console.print(Panel(header, box=box.DOUBLE))
+
+        header = f"""[bold cyan]FreeClaw[/bold cyan] [dim]v1.2.0[/dim]
+[dim]Primary:[/dim] {primary}  [dim]|[/dim]  [dim]Providers:[/dim] {len(providers)}  [dim]|[/dim]  [dim]Fallbacks:[/dim] {len(fallbacks)}"""
+
+        console.print(Panel(header, box=box.HEAVY, border_style="cyan"))
     
     def show_models(self):
         """显示 Models 表格"""
@@ -118,15 +233,34 @@ class FreeClawRichTUI:
     
     def show_menu(self):
         """显示菜单"""
-        menu = """[bold]Main Menu:[/bold]
-[cyan]1[/cyan] - Models    [cyan]2[/cyan] - Channels    [cyan]3[/cyan] - Skills
-[cyan]4[/cyan] - Add Provider    [cyan]5[/cyan] - Set Primary    [cyan]6[/cyan] - Test Provider
-[cyan]r[/cyan] - Refresh    [cyan]q[/cyan] - Quit"""
-        
-        console.print(Panel(menu, box=box.ROUNDED, border_style="blue"))
+        tab_indicator = {"models": "1", "channels": "2", "skills": "3"}
+        active = tab_indicator.get(self.current_tab, "1")
+
+        tabs = []
+        for key, label in [("1", "Models"), ("2", "Channels"), ("3", "Skills")]:
+            if key == active:
+                tabs.append(f"[bold reverse cyan] {label} [/]")
+            else:
+                tabs.append(f"[dim] {label} [/]")
+
+        console.print("  " + "  ".join(tabs))
+        console.print()
+
+        actions = (
+            "[cyan]4[/] Add Provider   "
+            "[cyan]5[/] Set Primary   "
+            "[cyan]6[/] Test Provider   "
+            "[cyan]r[/] Refresh   "
+            "[cyan]q[/] Quit"
+        )
+        console.print(f"  {actions}")
     
     def run(self):
         """运行主循环"""
+        if self.first_run:
+            play_intro(self.manager)
+            self.first_run = False
+
         while True:
             console.clear()
             self.show_header()

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freeclaw"
+version = "1.2.0"
+description = "API key management, cost optimization, and smart routing for 40+ AI providers"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["requests>=2.28.0"]
+
+[project.optional-dependencies]
+tui = ["textual>=0.40.0", "rich>=13.0.0"]
+mesh = ["redis>=5.0.0"]
+
+[project.scripts]
+freeclaw = "clawapi:main"

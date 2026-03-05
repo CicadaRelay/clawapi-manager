@@ -14,13 +14,14 @@ from typing import Dict, List, Optional
 class FreeClawConfigManager:
     def __init__(self, config_path: str = None):
         """初始化配置管理器"""
+        from constants import resolve_config_path, ensure_config
         if config_path is None:
-            config_path = os.path.expanduser("~/.openclaw/openclaw.json")
-        
+            config_path = str(ensure_config())
+
         self.config_path = Path(config_path)
-        
+
         if not self.config_path.exists():
-            raise FileNotFoundError(f"Config not found: {self.config_path}")
+            ensure_config()
         
         self.backup_dir = self.config_path.parent / "backups"
         self.backup_dir.mkdir(exist_ok=True)

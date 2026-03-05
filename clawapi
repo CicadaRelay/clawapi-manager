@@ -9,13 +9,13 @@ import os
 # 添加 lib 目录到路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))
 
-from config_manager import ClawAPIConfigManager
+from config_manager import FreeClawConfigManager
 
 def main():
     if len(sys.argv) < 2:
         print("""
 ╔══════════════════════════════════════╗
-║  ClawAPI Manager - Unified CLI       ║
+║  FreeClaw - Unified CLI              ║
 ╚══════════════════════════════════════╝
 
 📋 Configuration Management:
@@ -53,7 +53,7 @@ Examples:
 """)
         return
     
-    manager = ClawAPIConfigManager()
+    manager = FreeClawConfigManager()
     cmd = sys.argv[1]
     
     # 命令别名

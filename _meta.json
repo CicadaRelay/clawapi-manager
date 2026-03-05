@@ -1,0 +1,16 @@
+{
+  "name": "freeclaw",
+  "version": "1.2.0",
+  "description": "API key management, cost optimization, and smart routing for 40+ AI providers",
+  "type": "skill",
+  "entry": "skills/freeclaw/SKILL.md",
+  "legacy_entry": "SKILL.md",
+  "commands": {
+    "status": "python lib/config_manager.py status",
+    "health": "python lib/cost_monitor.py health",
+    "models": "python lib/model_switcher.py list",
+    "switch": "python lib/model_switcher.py switch",
+    "route": "python lib/smart_router.py"
+  },
+  "tags": ["api-management", "cost-optimization", "routing", "multi-provider"]
+}

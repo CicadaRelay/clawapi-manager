@@ -42,38 +42,53 @@ def save_costs(costs):
     with open(COST_FILE, 'w') as f:
         json.dump(costs, f, indent=2)
 
-def record_usage(provider, model, cost):
-    """Record a cost entry with model-level tracking"""
+def record_usage(provider, model, cost, tokens=0, task_id=None):
+    """Record a cost entry with model-level tracking + mesh sync"""
     costs = load_costs()
-    
+
     today = datetime.now().strftime('%Y-%m-%d')
     month = datetime.now().strftime('%Y-%m')
-    
+
     # Provider-level cost
     if provider not in costs['daily'][today]:
         costs['daily'][today][provider] = 0.0
     costs['daily'][today][provider] += cost
-    
+
     if provider not in costs['monthly'][month]:
         costs['monthly'][month][provider] = 0.0
     costs['monthly'][month][provider] += cost
-    
+
     if provider not in costs['total']:
         costs['total'][provider] = 0.0
     costs['total'][provider] += cost
-    
+
     # Model-level cost
     model_key = f"{provider}:{model}"
-    
+
     if model_key not in costs['by_model']['daily'][today]:
         costs['by_model']['daily'][today][model_key] = 0.0
     costs['by_model']['daily'][today][model_key] += cost
-    
+
     if model_key not in costs['by_model']['monthly'][month]:
         costs['by_model']['monthly'][month][model_key] = 0.0
     costs['by_model']['monthly'][month][model_key] += cost
-    
+
     save_costs(costs)
+
+    # Sync to mesh budget system
+    if cost > 0:
+        try:
+            from lib.mesh_bridge import MeshBridge
+            bridge = MeshBridge()
+            bridge.report_cost(
+                task_id=task_id or f"local-{int(time.time())}",
+                cost_usd=cost,
+                tokens_used=tokens,
+                model=model_key,
+            )
+            bridge.close()
+        except Exception:
+            pass  # mesh sync is best-effort
 
 def get_daily_report(date=None):
     """Get daily cost report"""
@@ -191,6 +206,27 @@ def main():
         cost = float(sys.argv[4])
         record_usage(provider, model, cost)
         print(f"Recorded ${cost:.2f} for {provider}:{model}")
+    elif command == 'mesh':
+        try:
+            from lib.mesh_bridge import MeshBridge
+            bridge = MeshBridge()
+            rec = bridge.get_recommended_model()
+            usage = bridge.get_budget_usage()
+            print(f"\nMesh Budget: hourly {usage['hourly']}% | daily {usage['daily']}% | monthly {usage['monthly']}%")
+            print(f"Tier: {rec['tier']} | Model: {rec['model']} | Accept: {rec['can_accept']}")
+            bridge.close()
+        except Exception as e:
+            print(f"Mesh unavailable: {e}")
+    elif command == 'health':
+        print("FreeClaw Cost Monitor: OK")
+        try:
+            from lib.mesh_bridge import MeshBridge
+            bridge = MeshBridge()
+            ok = bridge.ping()
+            print(f"Mesh Redis: {'OK' if ok else 'FAILED'}")
+            bridge.close()
+        except Exception as e:
+            print(f"Mesh Redis: unavailable ({e})")
     else:
         print(f"Unknown command: {command}")
         sys.exit(1)

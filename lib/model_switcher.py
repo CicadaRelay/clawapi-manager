@@ -13,12 +13,10 @@ from typing import List, Dict, Optional, Tuple
 class ModelSwitcher:
     def __init__(self, config_path: Optional[str] = None):
         """初始化模型切换器"""
+        from constants import ensure_config
         if config_path is None:
-            config_path = os.path.expanduser("~/.openclaw/openclaw.json")
+            config_path = str(ensure_config())
         self.config_path = Path(config_path)
-        
-        if not self.config_path.exists():
-            raise FileNotFoundError(f"Config not found: {self.config_path}")
     
     def _load_config(self) -> dict:
         """加载配置文件"""

@@ -97,14 +97,42 @@ def analyze_complexity(task: str) -> str:
     return "medium"
 
 
+def get_mesh_tier() -> Optional[str]:
+    """查询 FSC-Mesh 预算状态，返回当前允许的模型层级"""
+    try:
+        from lib.mesh_bridge import MeshBridge
+        bridge = MeshBridge()
+        tier = bridge.get_current_tier()
+        bridge.close()
+        return tier
+    except Exception:
+        return None
+
+
 def get_model_for_task(task: str) -> str:
     """获取最适合任务的模型（成本优先）
-    免费任务自动走 OpenRouter 负载均衡
+    优先查询 mesh 预算层级，受限时强制降级
     """
     complexity = analyze_complexity(task)
 
-    if complexity == "free":
-        # 优先用 OpenRouter Hub 负载均衡
+    # 检查 mesh 预算约束
+    mesh_tier = get_mesh_tier()
+    if mesh_tier:
+        from lib.mesh_bridge import MESH_TO_FREECLAW
+        allowed = MESH_TO_FREECLAW.get(mesh_tier, 'medium')
+        tier_rank = {'free': 0, 'medium': 1, 'expensive': 2}
+        if tier_rank.get(complexity, 1) > tier_rank.get(allowed, 1):
+            complexity = allowed
+
+        if mesh_tier == 'paused':
+            return 'none'
+
+        if mesh_tier == 'free' or complexity == 'free':
+            model = get_free_model()
+            if model:
+                return model
+
+    elif complexity == "free":
         model = get_free_model()
         if model:
             return model
@@ -218,17 +246,27 @@ def record_provider_success(name: str):
 
 
 def route_task(task: str, target_model: str = None) -> dict:
-    """完整路由：分析任务 → 选模型 → 返回路由结果"""
+    """完整路由：分析任务 → 选模型 → 返回路由结果
+    自动上报成本到 mesh 预算系统
+    """
     if target_model is None:
         target_model = get_model_for_task(task)
 
     complexity = analyze_complexity(task)
-    return {
+    mesh_tier = get_mesh_tier()
+
+    result = {
         "task": task[:100],
         "complexity": complexity,
         "model": target_model,
         "is_free": complexity == "free",
     }
+
+    if mesh_tier:
+        result["mesh_tier"] = mesh_tier
+        result["mesh_constrained"] = mesh_tier in ("economy", "free", "paused")
+
+    return result
 
 
 def main():

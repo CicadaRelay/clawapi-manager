@@ -1,375 +1,281 @@
-# FreeClaw
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=180&section=header&text=FreeClaw&fontSize=42&fontColor=fff&animation=fadeIn&fontAlignY=36&desc=%E2%9C%A8%20API%20Hub%20for%2040%2B%20AI%20Providers%20%E2%9C%A8&descSize=16&descAlignY=56" />
+</p>
 
-> 🔧 Professional API management and cost optimization for OpenClaw deployments
+<p align="center">
+  <a href="#install"><img src="https://img.shields.io/badge/-Install-ff69b4?style=for-the-badge&logo=hackthebox&logoColor=white" /></a>
+  <a href="#features"><img src="https://img.shields.io/badge/-Features-a855f7?style=for-the-badge&logo=sparkles&logoColor=white" /></a>
+  <a href="#usage"><img src="https://img.shields.io/badge/-Usage-06b6d4?style=for-the-badge&logo=windowsterminal&logoColor=white" /></a>
+  <a href="#architecture"><img src="https://img.shields.io/badge/-Architecture-f59e0b?style=for-the-badge&logo=diagramsdotnet&logoColor=white" /></a>
+</p>
 
-[English](#english) | [中文](#中文)
+<p align="center">
+  <img src="https://img.shields.io/badge/version-1.2.0-ff69b4?style=flat-square" />
+  <img src="https://img.shields.io/badge/python-3.11+-a855f7?style=flat-square&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/providers-40%2B-06b6d4?style=flat-square" />
+  <img src="https://img.shields.io/badge/savings-30--90%25-10b981?style=flat-square" />
+  <img src="https://img.shields.io/badge/license-MIT-f59e0b?style=flat-square" />
+</p>
+
+<p align="center">
+  <code>( *^-^)p ～ smart routing ～ cost optimization ～ multi-provider ～ q(^-^* )</code>
+</p>
 
 ---
 
-## English
+## `>_ What is FreeClaw?`
 
-Professional API management and cost optimization for OpenClaw deployments.
+> *"From Cost Optimization to Intelligent Orchestration"* ～(^-^～)
 
-### What It Does
+FreeClaw manages your AI API keys, monitors costs, and **automatically routes tasks to the cheapest available model** — saving you 30-90% on API spending.
 
-Manages API keys, monitors costs, and routes tasks to the most cost-effective models automatically. Saves 30-90% on API costs through intelligent routing and free model integration.
+```
+                    +-----------+
+  Your App  ------> | FreeClaw  | ------> OpenAI
+  Claude Code       |  Hub      | ------> Anthropic
+  Any Client        | (routing) | ------> Google
+                    |  (^_^)    | ------> DeepSeek
+                    +-----------+ ------> 40+ more...
+```
 
-Professional API management and cost optimization for OpenClaw deployments.
+<br>
 
-## What It Does
+## `>_ Features` {#features}
 
-Manages API keys, monitors costs, and routes tasks to the most cost-effective models automatically. Saves 30-90% on API costs through intelligent routing and free model integration.
+<table>
+<tr>
+<td width="50%">
 
-## Key Features
+### ～ Smart Routing ～
+```
+Simple task  --> Free models  (100% savings)
+Medium task  --> Budget models (50-70% savings)
+Complex task --> Premium models (full power)
+```
+AI complexity prediction auto-selects the tier!
 
-- **Smart Routing**: Automatically routes simple tasks to free models (Qwen, Llama) via OpenRouter
-- **Cost Tracking**: Real-time monitoring of API usage and spending
-- **Multi-Provider**: Supports OpenAI, Anthropic, Google, and 40+ providers
-- **Budget Alerts**: Get notified before you exceed spending limits
-- **Key Health**: Automatic detection of expired or rate-limited keys
-- **Multi-Channel Alerts**: Telegram, Discord, Slack, Feishu, QQ, DingTalk
+</td>
+<td width="50%">
 
-## Quick Start
+### ～ Cost Tracking ～
+```
+ Daily spending .... $2.40
+ Free tier used .... 847 calls
+ Money saved ...... $18.60
+ -------------------------
+ Efficiency ....... 88.6% (^o^)
+```
+
+</td>
+</tr>
+<tr>
+<td>
+
+### ～ Circuit Breaker ～
+```
+Provider down? No problem!
+  openai .... [OPEN]  (healthy)
+  anthropic . [OPEN]  (healthy)
+  groq ...... [HALF]  (recovering)
+  deepseek .. [CLOSED](bypassed)
+```
+Auto-fallback, zero downtime.
+
+</td>
+<td>
+
+### ～ Multi-Interface ～
+```
+  TUI ......... Textual (SSH)
+  Rich ........ Interactive menu
+  CLI ......... Scripts & bots
+  Hub ......... OpenAI-compatible API
+```
+
+</td>
+</tr>
+</table>
+
+<br>
+
+## `>_ Install` {#install}
 
 ```bash
-# Install
-cd ~/.openclaw/workspace/skills
+# Standalone (no OpenClaw needed!)
 git clone https://github.com/2233admin/freeclaw.git
 cd freeclaw
 pip install -r requirements.txt
 
-# Configure notifications (optional)
-cp config/notify.json.example config/notify.json
-# Edit with your webhook URLs
-
-# Test
-python3 lib/cost_monitor.py health
+# Or install as package
+pip install .                    # core only
+pip install ".[tui]"             # + beautiful TUI
+pip install ".[mesh]"            # + Redis cluster support
+pip install ".[tui,mesh]"        # everything! (>w<)
 ```
 
-## How It Saves Money
-
-The system analyzes each task and routes it intelligently:
-
-- **Simple tasks** (search, weather, translate) → Free models (100% savings)
-- **Medium tasks** (summaries, basic code) → Cost-effective models (50-70% savings)
-- **Complex tasks** (architecture, analysis) → Premium models (Opus, GPT-4)
-
-### Example Savings
-
-| Task Type | Before | After | Savings |
-|-----------|--------|-------|---------|
-| Weather check | $0.015 | $0.00 | 100% |
-| Code review | $0.30 | $0.10 | 67% |
-| Architecture design | $1.50 | $1.50 | 0% |
-
-**Average savings: 30-90%** depending on your task mix.
-
-## Configuration
-
-### OpenRouter (Optional, for free models)
-
-Add your OpenRouter key to `config/openrouter.json`:
-
-```json
-{
-  "api_key": "sk-or-v1-YOUR_KEY_HERE"
-}
-```
-
-Get a free key at [openrouter.ai](https://openrouter.ai)
-
-### Notifications
-
-Edit `config/notify.json`:
-
-```json
-{
-  "telegram": {
-    "enabled": true,
-    "bot_token": "YOUR_BOT_TOKEN",
-    "chat_id": "YOUR_CHAT_ID"
-  }
-}
-```
-
-## Usage
+<details>
+<summary> <b>As OpenClaw Skill</b> (click to expand) </summary>
 
 ```bash
-# Check system health
-python3 lib/cost_monitor.py health
-
-# Generate cost report
-python3 lib/daily_report.py
-
-# Route a task (returns recommended model)
-python3 lib/task_delegation.py route "search weather in Tokyo"
-
-# Check key health
-python3 lib/key_health.py status
-
-# Test notifications
-python3 lib/notifier.py test
+# If you have OpenClaw installed, FreeClaw auto-detects it
+# Config priority:
+#   $FREECLAW_CONFIG > ~/.openclaw/openclaw.json > ~/.freeclaw/freeclaw.json
 ```
 
-## Automation
+</details>
 
-Add to cron for automated monitoring:
+<br>
 
-```cron
-# Daily cost report at 1 AM
-0 1 * * * cd /path/to/freeclaw && python3 lib/daily_report.py
+## `>_ Usage` {#usage}
 
-# Health check every 15 minutes
-*/15 * * * * cd /path/to/freeclaw && python3 lib/cost_monitor.py health
+### Quick Start ～
+
+```bash
+# Health check
+python lib/cost_monitor.py health
+
+# Launch TUI with startup animation
+python clawapi-rich.py
+
+# Route a task (returns best model)
+python lib/smart_router.py route "translate hello to Japanese"
+
+# Switch primary model
+python lib/model_switcher.py list
+python lib/model_switcher.py switch 3
 ```
 
-## Architecture
+### CLI Commands ～
 
-```
-FreeClaw
-├── lib/                    # Core modules
-│   ├── cost_monitor.py     # Cost tracking
-│   ├── task_delegation.py  # Smart routing
-│   ├── notifier.py         # Alerts
-│   ├── budget_alert.py     # Budget monitoring
-│   └── key_health.py       # Key health checks
-├── config/                 # Configuration
-└── data/                   # Runtime data
+```bash
+./clawapi status                    # Full status overview
+./clawapi providers                 # List all providers
+./clawapi models                    # List all models
+./clawapi set-primary deepseek/deepseek-chat
+./clawapi add-fallback minimax/MiniMax-M2.5
+./clawapi validate                  # Check config health
 ```
 
-## Requirements
+### TUI Preview ～
 
-- Python 3.8+
-- OpenClaw (any recent version)
-- Optional: OpenRouter API key (for free model routing)
+```
+  ______              _____ _
+ |  ____|            / ____| |
+ | |__ _ __ ___  ___| |    | | __ ___      __
+ |  __| '__/ _ \/ _ \ |    | |/ _` \ \ /\ / /
+ | |  | | |  __/  __/ |____| | (_| |\ V  V /
+ |_|  |_|  \___|\___|\_____|_|\__,_| \_/\_/
 
-## Security
+  API Hub for 40+ AI Providers
 
-- API keys are encrypted at rest (AES-256)
-- Never commit keys to version control
-- Use environment variables for production
-- Review config examples before deployment
+  ok Config       openclaw.json
+  ok Providers    2 loaded
+  ok Primary      claude-proxy/claude-sonnet-4
+  ok Fallbacks    0 models
+  ok Router       ready
+  ok Breaker      ready
 
-## License
+  2 providers  |  4 models  |  0 fallbacks
+```
 
-MIT License - Free for personal and commercial use.
+<br>
 
-## Links
+## `>_ How It Saves Money`
 
-- [OpenClaw](https://github.com/openclaw/openclaw)
-- [OpenRouter](https://openrouter.ai)
-- [ClawHub](https://clawhub.com)
+| Task | Example | Before | After | Savings |
+|:-----|:--------|-------:|------:|--------:|
+| Simple | "what time is it?" | $0.015 | **$0.00** | `100%` |
+| Medium | "summarize this PR" | $0.30 | **$0.10** | `67%` |
+| Complex | "architect a microservice" | $1.50 | **$1.50** | `0%` |
+
+> Average savings: **30-90%** depending on task mix (o^-^o)b
+
+<br>
+
+## `>_ Supported Providers`
+
+<p>
+  <img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white" />
+  <img src="https://img.shields.io/badge/Anthropic-191919?style=flat-square&logo=anthropic&logoColor=white" />
+  <img src="https://img.shields.io/badge/Google-4285F4?style=flat-square&logo=google&logoColor=white" />
+  <img src="https://img.shields.io/badge/DeepSeek-0A0A0A?style=flat-square" />
+  <img src="https://img.shields.io/badge/Groq-F55036?style=flat-square" />
+  <img src="https://img.shields.io/badge/Moonshot-000000?style=flat-square" />
+  <img src="https://img.shields.io/badge/OpenRouter-6366f1?style=flat-square" />
+  <img src="https://img.shields.io/badge/Ollama-000000?style=flat-square" />
+  <img src="https://img.shields.io/badge/VolcEngine-3370FF?style=flat-square" />
+  <img src="https://img.shields.io/badge/MiniMax-FF6B6B?style=flat-square" />
+  <img src="https://img.shields.io/badge/...and%2030%2B%20more-gray?style=flat-square" />
+</p>
+
+<br>
+
+## `>_ Architecture` {#architecture}
+
+```
+freeclaw/
+  ├── clawapi                # Unified CLI entrypoint
+  ├── clawapi-rich.py        # Rich TUI (with startup animation!)
+  ├── clawapi-tui.py         # Textual TUI (full interactive)
+  │
+  ├── lib/
+  │   ├── constants.py       # Config path resolution
+  │   ├── config_manager.py  # Provider/model/fallback management
+  │   ├── model_switcher.py  # Safe model switching
+  │   ├── smart_router.py    # Three-tier intelligent routing
+  │   ├── cost_monitor.py    # Usage tracking & reports
+  │   ├── circuit_breaker.py # Provider health & auto-fallback
+  │   ├── provider_adapter.py    # Unified provider adapter
+  │   ├── builtin_providers.py   # 40+ provider templates
+  │   ├── ai_complexity_predictor.py  # AI task analysis
+  │   └── mesh_bridge.py    # FSC-Mesh Redis bridge
+  │
+  ├── .claude-plugin/        # Claude Code plugin metadata
+  ├── skills/freeclaw/       # OpenClaw skill definition
+  ├── config/                # Configuration templates
+  └── data/                  # Runtime data
+```
+
+### Config Resolution ～
+
+```
+$FREECLAW_CONFIG          # env var (highest priority)
+  └─> ~/.openclaw/openclaw.json   # OpenClaw integration
+       └─> ~/.freeclaw/freeclaw.json  # standalone (auto-created)
+```
+
+<br>
+
+## `>_ Troubleshooting`
+
+<details>
+<summary>Common issues</summary>
+
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for:
+- Protocol mismatch errors
+- Config file corruption recovery
+- API key expiration detection
+- Circuit breaker status
+
+</details>
+
+<br>
+
+## `>_ Links`
+
+<p>
+  <a href="https://github.com/openclaw/openclaw"><img src="https://img.shields.io/badge/OpenClaw-main%20project-ff69b4?style=flat-square" /></a>
+  <a href="https://openrouter.ai"><img src="https://img.shields.io/badge/OpenRouter-free%20models-6366f1?style=flat-square" /></a>
+</p>
+
+<br>
 
 ---
 
-**Version**: 1.0.1  
-**Last Updated**: 2026-03-02
+<p align="center">
+  <code>made with mass mass love by mass mass people ～(=^-^)ノ</code>
+</p>
 
-## 模型切换（新功能）
-
-集成自 openclaw-switch，提供安全的模型切换功能。
-
-### 查看当前模型
-
-```bash
-python3 lib/model_switcher.py status
-```
-
-### 列出所有模型
-
-```bash
-python3 lib/model_switcher.py list
-```
-
-### 切换模型
-
-```bash
-# 通过编号切换
-python3 lib/model_switcher.py switch 6
-
-# 或通过模型 ID
-python3 lib/model_switcher.py switch minimax/MiniMax-M2.5
-```
-
-### 特性
-
-- ✅ 安全的 JSON 修改（防止格式错误）
-- ✅ 显示 Fallback 链
-- ✅ 自动重启 daemon
-- ✅ 支持编号和 ID 两种方式
-
-
-## 使用场景
-
-### 场景 1：SSH/终端（推荐）
-完整的 Textual TUI，支持鼠标和键盘交互。
-
-```bash
-ssh user@server
-cd ~/.openclaw/workspace/skills/freeclaw
-python3 clawapi-tui.py
-```
-
-### 场景 2：受限终端
-Rich 交互式菜单，只支持键盘。
-
-```bash
-python3 clawapi-rich.py
-```
-
-### 场景 3：QQ/飞书等纯文字
-使用 CLI 命令。
-
-```bash
-./clawapi status
-./clawapi providers
-./clawapi add-provider openai https://api.openai.com/v1 sk-xxx
-```
-
-### 场景 4：智能自动选择
-自动检测环境并选择合适的界面。
-
-```bash
-python3 clawapi-ui.py
-```
-
----
-
-## 环境检测
-
-| 环境 | 检测方式 | 使用界面 |
-|------|---------|---------|
-| SSH/终端 | `termios.tcgetattr()` | Textual TUI |
-| 受限终端 | `sys.stdin.isatty()` | Rich 菜单 |
-| QQ/飞书 | 非 TTY | CLI |
-
-# FreeClaw - 核心亮点
-
-## 与 OpenClaw Switch 的对比
-
-### OpenClaw Switch
-> "The missing remote control for your AI Agents."
-
-**定位**：模型切换工具
-
-**核心功能**：
-- 🚫 拒绝崩溃：Python 原生解析 JSON
-- 📊 可视化 Failover：展示备份链
-- 🚀 丝滑切换：数字编号快速切换
-- 💓 路由透明：显示心跳和子智能体路由
-- 🛡️ 极致安全：本地运行，Key 脱敏
-
----
-
-### FreeClaw
-> "From Cost Optimization to Intelligent Orchestration"
-
-**定位**：完整配置管理平台
-
-## 独特亮点
-
-### 1. 🎯 三合一管理
-**OpenClaw Switch**：只管理模型切换  
-**FreeClaw**：Models + Channels + Skills 统一管理
-
-### 2. 🌐 多界面适配
-**OpenClaw Switch**：只有命令行  
-**FreeClaw**：
-- Textual TUI（SSH/终端）
-- Rich 菜单（受限终端）
-- CLI（脚本）
-- 对话式接口（QQ/飞书）
-
-### 3. 🤖 AI 驱动
-**OpenClaw Switch**：手动输入命令  
-**FreeClaw**：
-- AI 复杂度预测（Qwen 0.5B）
-- 自然语言操作
-- 智能路由（自动选免费模型）
-
-### 4. 🔗 通道管理（独有）
-**OpenClaw Switch**：无  
-**FreeClaw**：
-- QQ、企业微信、飞书、钉钉等通道配置
-- 一键启用/禁用
-- 批量管理
-
-### 5. 📦 任务调度（独有）
-**OpenClaw Switch**：无  
-**FreeClaw**：
-- 多节点负载均衡
-- 任务队列
-- 失败重试
-- 性能追踪
-
-### 6. 💰 成本优化（独有）
-**OpenClaw Switch**：无  
-**FreeClaw**：
-- 智能路由（省钱 30-90%）
-- 成本监控
-- 预算预警
-
----
-
-## 功能对比表
-
-| 特性 | OpenClaw Switch | FreeClaw |
-|------|----------------|-----------------|
-| 定位 | 模型切换工具 | 完整配置管理平台 |
-| 功能范围 | 单一（模型） | 三合一（Models + Channels + Skills） |
-| 界面 | CLI | TUI + Rich + CLI + 对话式 |
-| 智能化 | 无 | AI 预测 + 自动路由 |
-| 成本优化 | 无 | 监控 + 优化 |
-| 多节点协作 | 无 | 任务调度 + 负载均衡 |
-| 通道管理 | 无 | QQ/飞书/企业微信等 |
-| 环境适配 | 终端 | SSH/QQ/飞书/脚本 |
-
----
-
-## 核心差异
-
-**OpenClaw Switch 是螺丝刀，FreeClaw 是瑞士军刀。**
-
-- **OpenClaw Switch**：专注于模型切换，简单高效
-- **FreeClaw**：全方位配置管理，智能协作
-
----
-
-## 适用场景
-
-### 选择 OpenClaw Switch
-- 只需要切换模型
-- 喜欢简单的命令行工具
-- 不需要成本优化和多节点协作
-
-### 选择 FreeClaw
-- 需要管理 Models、Channels、Skills
-- 需要多种界面（TUI/CLI/对话式）
-- 需要成本优化（省钱 30-90%）
-- 需要多节点协作和任务调度
-- 需要在 QQ/飞书等环境中使用
-
----
-
-## 总结
-
-FreeClaw 不只是模型切换工具，而是：
-- ✅ 完整的配置管理平台
-- ✅ 智能的成本优化系统
-- ✅ 强大的多节点协作框架
-- ✅ 灵活的多界面适配方案
-
-**从成本优化到智能编排，一站式解决方案。**
-
----
-
-## 故障排查
-
-遇到问题？查看 [故障排查指南](TROUBLESHOOTING.md)
-
-常见问题：
-- [错误码对照表](TROUBLESHOOTING.md#常见错误码)
-- [协议不匹配](TROUBLESHOOTING.md#1-协议不匹配)
-- [配置文件损坏](TROUBLESHOOTING.md#2-配置文件损坏)
-- [API Key 失效](TROUBLESHOOTING.md#3-api-key-失效)
-
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=100&section=footer" />
+</p>

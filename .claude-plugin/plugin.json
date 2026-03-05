@@ -1,0 +1,12 @@
+{
+  "name": "freeclaw",
+  "version": "1.2.0",
+  "description": "API key management, cost optimization, and smart routing for 40+ AI providers",
+  "skills": ["skills/freeclaw/SKILL.md"],
+  "commands": {
+    "freeclaw-status": "python lib/config_manager.py status",
+    "freeclaw-health": "python lib/cost_monitor.py health",
+    "freeclaw-models": "python lib/model_switcher.py list",
+    "freeclaw-switch": "python lib/model_switcher.py switch"
+  }
+}
