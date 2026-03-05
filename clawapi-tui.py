@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ClawAPI Manager TUI - 完整版
+FreeClaw TUI - 完整版
 基于 Textual 的配置管理面板
 """
 
@@ -18,7 +18,7 @@ import os
 # 添加 lib 目录
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))
 
-from config_manager import ClawAPIConfigManager
+from config_manager import FreeClawConfigManager
 
 
 class AddProviderScreen(ModalScreen):
@@ -89,8 +89,8 @@ class AddChannelScreen(ModalScreen):
             self.dismiss(None)
 
 
-class ClawAPITUI(App):
-    """ClawAPI Manager TUI"""
+class FreeClawTUI(App):
+    """FreeClaw TUI"""
     
     CSS = """
     Screen {
@@ -146,7 +146,7 @@ class ClawAPITUI(App):
     
     def __init__(self):
         super().__init__()
-        self.manager = ClawAPIConfigManager()
+        self.manager = FreeClawConfigManager()
     
     def compose(self) -> ComposeResult:
         """创建界面"""
@@ -380,7 +380,7 @@ class ClawAPITUI(App):
 
 
 def main():
-    app = ClawAPITUI()
+    app = FreeClawTUI()
     app.run()
 
 

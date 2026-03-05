@@ -51,3 +51,4 @@ Thumbs.db
 config/managed_keys_*.json
 config/openrouter_keys.json
 config/*_keys.json
+lib/__pycache__/

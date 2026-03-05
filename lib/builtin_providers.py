@@ -133,7 +133,7 @@ def main():
     print("\n=== OpenAI 模板 ===")
     template = get_provider_template('openai')
     print(f"Name: {template['name']}")
-    print(f"Base URL: {template['baseURL']}")
+    print(f"Base URL: {template['baseUrl']}")
     print(f"Protocol: {template['api']}")
     print(f"Models: {len(template['models'])}")
 

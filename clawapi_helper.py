@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ClawAPI Helper - 对话式接口辅助函数
+FreeClaw Helper - 对话式接口辅助函数
 供 AI 助手在 QQ/飞书等环境中调用
 """
 
@@ -8,14 +8,14 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))
 
-from config_manager import ClawAPIConfigManager
+from config_manager import FreeClawConfigManager
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich import box
 
 console = Console()
-manager = ClawAPIConfigManager()
+manager = FreeClawConfigManager()
 
 def show_status():
     """显示配置状态"""
@@ -104,44 +104,24 @@ def toggle_channel_interactive(name):
     except Exception as e:
         return f"❌ 错误：{e}"
 
-# 导出所有函数
-__all__ = [
-    'show_status',
-    'show_providers',
-    'show_channels',
-    'show_models',
-    'add_provider_interactive',
-    'set_primary_interactive',
-    'add_channel_interactive',
-    'toggle_channel_interactive',
-    'manager'
-]
-
-if __name__ == "__main__":
-    # 测试
-    print(show_status())
-    print("\n" + show_providers())
-    print("\n" + show_channels())
-
 def show_protocols():
     """显示所有支持的协议"""
     protocols = manager.list_protocols()
-    
+
     output = "**支持的协议**\n\n"
     for p in protocols:
         output += f"• {p['id']}: {p['name']}\n  {p['description']}\n\n"
-    
+
     return output
 
 def set_protocol_interactive(provider_name, protocol):
     """设置 provider 的协议"""
     try:
         manager.set_provider_protocol(provider_name, protocol)
-        return f"✅ Provider '{provider_name}' 协议已设置为 {protocol}"
+        return f"Provider '{provider_name}' 协议已设置为 {protocol}"
     except Exception as e:
-        return f"❌ 错误：{e}"
+        return f"错误：{e}"
 
-# 更新导出列表
 __all__ = [
     'show_status',
     'show_providers',
@@ -155,3 +135,8 @@ __all__ = [
     'set_protocol_interactive',
     'manager'
 ]
+
+if __name__ == "__main__":
+    print(show_status())
+    print("\n" + show_providers())
+    print("\n" + show_channels())

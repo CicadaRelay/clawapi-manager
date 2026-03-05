@@ -38,7 +38,8 @@ def predict_monthly_cost():
     today = datetime.now()
     current_month = today.strftime('%Y-%m')
     days_passed = today.day
-    days_in_month = (datetime(today.year, today.month + 1, 1) - timedelta(days=1)).day if today.month < 12 else 31
+    next_month = datetime(today.year + (1 if today.month == 12 else 0), (today.month % 12) + 1, 1)
+    days_in_month = (next_month - timedelta(days=1)).day
     
     # Get current month's cost so far
     monthly_cost = 0.0

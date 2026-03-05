@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ClawAPI Manager - Rich TUI
+FreeClaw - Rich TUI
 基于 rich 的配置管理界面
 """
 
@@ -18,13 +18,13 @@ import time
 # 添加 lib 目录
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))
 
-from config_manager import ClawAPIConfigManager
+from config_manager import FreeClawConfigManager
 
 console = Console()
 
-class ClawAPIRichTUI:
+class FreeClawRichTUI:
     def __init__(self):
-        self.manager = ClawAPIConfigManager()
+        self.manager = FreeClawConfigManager()
         self.current_tab = "models"
     
     def show_header(self):
@@ -33,7 +33,7 @@ class ClawAPIRichTUI:
         fallbacks = self.manager.get_fallbacks()
         providers = self.manager.list_providers()
         
-        header = f"""[bold cyan]ClawAPI Manager[/bold cyan]
+        header = f"""[bold cyan]FreeClaw[/bold cyan]
 [dim]Primary:[/dim] {primary}  |  [dim]Providers:[/dim] {len(providers)}  |  [dim]Fallbacks:[/dim] {len(fallbacks)}"""
         
         console.print(Panel(header, box=box.DOUBLE))
@@ -240,7 +240,7 @@ class ClawAPIRichTUI:
 
 def main():
     try:
-        tui = ClawAPIRichTUI()
+        tui = FreeClawRichTUI()
         tui.run()
     except KeyboardInterrupt:
         console.print("\n[yellow]Interrupted by user[/yellow]")

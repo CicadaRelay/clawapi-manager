@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ClawAPI Manager - 智能入口
+FreeClaw - 智能入口
 自动检测环境并选择合适的界面
 """
 
@@ -33,8 +33,8 @@ def main():
         print("Starting Textual TUI...")
         import time
         time.sleep(0.5)
-        from clawapi_tui import ClawAPITUI
-        app = ClawAPITUI()
+        from clawapi_tui import FreeClawTUI
+        app = FreeClawTUI()
         app.run()
     
     elif is_interactive_terminal():
@@ -42,8 +42,8 @@ def main():
         print("Starting Rich TUI...")
         import time
         time.sleep(0.5)
-        from clawapi_rich import ClawAPIRichTUI
-        tui = ClawAPIRichTUI()
+        from clawapi_rich import FreeClawRichTUI
+        tui = FreeClawRichTUI()
         tui.run()
     
     else:
@@ -51,15 +51,15 @@ def main():
         # 这个模式下，应该由 AI 助手调用，而不是用户直接运行
         # 返回一个提示，告诉 AI 如何使用
         print("""
-ClawAPI Manager - Conversational Interface
+FreeClaw - Conversational Interface
 
 This tool is designed to be called by AI assistants in chat environments (QQ/Feishu).
 
 For AI assistants:
   Use the Python API directly:
   
-  from lib.config_manager import ClawAPIConfigManager
-  manager = ClawAPIConfigManager()
+  from lib.config_manager import FreeClawConfigManager
+  manager = FreeClawConfigManager()
   
   # List providers
   providers = manager.list_providers()

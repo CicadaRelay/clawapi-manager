@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ClawAPI Manager - 中央服务器 API Key 托管管理脚本
+FreeClaw - 中央服务器 API Key 托管管理脚本
 用法：
   python3 claw_api_manager_central.py list              # 列出所有 providers
   python3 claw_api_manager_central.py update <name> <key>  # 更新 API Key
@@ -17,14 +17,14 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))
 
-from config_manager import ClawAPIConfigManager
+from config_manager import FreeClawConfigManager
 
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
         return
     
-    mgr = ClawAPIConfigManager()
+    mgr = FreeClawConfigManager()
     cmd = sys.argv[1]
     
     if cmd == 'list':

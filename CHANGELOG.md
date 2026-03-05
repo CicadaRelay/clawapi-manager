@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to ClawAPI Manager will be documented in this file.
+All notable changes to FreeClaw will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -68,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 1. Pull latest changes:
    ```bash
-   cd ~/.openclaw/workspace/skills/clawapi-manager
+   cd ~/.openclaw/workspace/skills/freeclaw
    git pull origin master
    ```
 
@@ -119,6 +119,6 @@ No breaking changes. Simply pull latest changes and restart gateway.
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/2233admin/clawapi-manager/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/2233admin/clawapi-manager/discussions)
-- **ClawHub**: [clawhub.com/skills/clawapi-manager](https://clawhub.com/skills/clawapi-manager)
+- **Issues**: [GitHub Issues](https://github.com/2233admin/freeclaw/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/2233admin/freeclaw/discussions)
+- **ClawHub**: [clawhub.com/skills/freeclaw](https://clawhub.com/skills/freeclaw)

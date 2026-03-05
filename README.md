@@ -1,4 +1,4 @@
-# ClawAPI Manager
+# FreeClaw
 
 > 🔧 Professional API management and cost optimization for OpenClaw deployments
 
@@ -34,8 +34,8 @@ Manages API keys, monitors costs, and routes tasks to the most cost-effective mo
 ```bash
 # Install
 cd ~/.openclaw/workspace/skills
-git clone https://github.com/2233admin/clawapi-manager.git
-cd clawapi-manager
+git clone https://github.com/2233admin/freeclaw.git
+cd freeclaw
 pip install -r requirements.txt
 
 # Configure notifications (optional)
@@ -117,16 +117,16 @@ Add to cron for automated monitoring:
 
 ```cron
 # Daily cost report at 1 AM
-0 1 * * * cd /path/to/clawapi-manager && python3 lib/daily_report.py
+0 1 * * * cd /path/to/freeclaw && python3 lib/daily_report.py
 
 # Health check every 15 minutes
-*/15 * * * * cd /path/to/clawapi-manager && python3 lib/cost_monitor.py health
+*/15 * * * * cd /path/to/freeclaw && python3 lib/cost_monitor.py health
 ```
 
 ## Architecture
 
 ```
-ClawAPI Manager
+FreeClaw
 ├── lib/                    # Core modules
 │   ├── cost_monitor.py     # Cost tracking
 │   ├── task_delegation.py  # Smart routing
@@ -206,7 +206,7 @@ python3 lib/model_switcher.py switch minimax/MiniMax-M2.5
 
 ```bash
 ssh user@server
-cd ~/.openclaw/workspace/skills/clawapi-manager
+cd ~/.openclaw/workspace/skills/freeclaw
 python3 clawapi-tui.py
 ```
 
@@ -243,7 +243,7 @@ python3 clawapi-ui.py
 | 受限终端 | `sys.stdin.isatty()` | Rich 菜单 |
 | QQ/飞书 | 非 TTY | CLI |
 
-# ClawAPI Manager - 核心亮点
+# FreeClaw - 核心亮点
 
 ## 与 OpenClaw Switch 的对比
 
@@ -261,7 +261,7 @@ python3 clawapi-ui.py
 
 ---
 
-### ClawAPI Manager
+### FreeClaw
 > "From Cost Optimization to Intelligent Orchestration"
 
 **定位**：完整配置管理平台
@@ -270,11 +270,11 @@ python3 clawapi-ui.py
 
 ### 1. 🎯 三合一管理
 **OpenClaw Switch**：只管理模型切换  
-**ClawAPI Manager**：Models + Channels + Skills 统一管理
+**FreeClaw**：Models + Channels + Skills 统一管理
 
 ### 2. 🌐 多界面适配
 **OpenClaw Switch**：只有命令行  
-**ClawAPI Manager**：
+**FreeClaw**：
 - Textual TUI（SSH/终端）
 - Rich 菜单（受限终端）
 - CLI（脚本）
@@ -282,21 +282,21 @@ python3 clawapi-ui.py
 
 ### 3. 🤖 AI 驱动
 **OpenClaw Switch**：手动输入命令  
-**ClawAPI Manager**：
+**FreeClaw**：
 - AI 复杂度预测（Qwen 0.5B）
 - 自然语言操作
 - 智能路由（自动选免费模型）
 
 ### 4. 🔗 通道管理（独有）
 **OpenClaw Switch**：无  
-**ClawAPI Manager**：
+**FreeClaw**：
 - QQ、企业微信、飞书、钉钉等通道配置
 - 一键启用/禁用
 - 批量管理
 
 ### 5. 📦 任务调度（独有）
 **OpenClaw Switch**：无  
-**ClawAPI Manager**：
+**FreeClaw**：
 - 多节点负载均衡
 - 任务队列
 - 失败重试
@@ -304,7 +304,7 @@ python3 clawapi-ui.py
 
 ### 6. 💰 成本优化（独有）
 **OpenClaw Switch**：无  
-**ClawAPI Manager**：
+**FreeClaw**：
 - 智能路由（省钱 30-90%）
 - 成本监控
 - 预算预警
@@ -313,7 +313,7 @@ python3 clawapi-ui.py
 
 ## 功能对比表
 
-| 特性 | OpenClaw Switch | ClawAPI Manager |
+| 特性 | OpenClaw Switch | FreeClaw |
 |------|----------------|-----------------|
 | 定位 | 模型切换工具 | 完整配置管理平台 |
 | 功能范围 | 单一（模型） | 三合一（Models + Channels + Skills） |
@@ -328,10 +328,10 @@ python3 clawapi-ui.py
 
 ## 核心差异
 
-**OpenClaw Switch 是螺丝刀，ClawAPI Manager 是瑞士军刀。**
+**OpenClaw Switch 是螺丝刀，FreeClaw 是瑞士军刀。**
 
 - **OpenClaw Switch**：专注于模型切换，简单高效
-- **ClawAPI Manager**：全方位配置管理，智能协作
+- **FreeClaw**：全方位配置管理，智能协作
 
 ---
 
@@ -342,7 +342,7 @@ python3 clawapi-ui.py
 - 喜欢简单的命令行工具
 - 不需要成本优化和多节点协作
 
-### 选择 ClawAPI Manager
+### 选择 FreeClaw
 - 需要管理 Models、Channels、Skills
 - 需要多种界面（TUI/CLI/对话式）
 - 需要成本优化（省钱 30-90%）
@@ -353,7 +353,7 @@ python3 clawapi-ui.py
 
 ## 总结
 
-ClawAPI Manager 不只是模型切换工具，而是：
+FreeClaw 不只是模型切换工具，而是：
 - ✅ 完整的配置管理平台
 - ✅ 智能的成本优化系统
 - ✅ 强大的多节点协作框架

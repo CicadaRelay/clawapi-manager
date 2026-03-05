@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ClawAPI Config Manager - openclaw.json API 配置管理器
+FreeClaw Config Manager - openclaw.json API 配置管理器
 统一管理 providers、keys、models、fallbacks
 """
 
@@ -11,7 +11,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional
 
-class ClawAPIConfigManager:
+class FreeClawConfigManager:
     def __init__(self, config_path: str = None):
         """初始化配置管理器"""
         if config_path is None:
@@ -258,7 +258,7 @@ class ClawAPIConfigManager:
             raise ValueError(f"Provider '{provider_name}' not found")
         
         provider = providers[provider_name]
-        base_url = provider.get('baseURL', '')
+        base_url = provider.get('baseUrl', '')
         api_key = provider.get('apiKey', '')
         
         try:
@@ -314,7 +314,7 @@ class ClawAPIConfigManager:
     def show_status(self):
         """显示完整状态"""
         print("\n╔══════════════════════════════════════╗")
-        print("║  ClawAPI Config Manager              ║")
+        print("║  FreeClaw Config Manager             ║")
         print("╚══════════════════════════════════════╝")
         
         # Primary & Fallbacks
@@ -544,82 +544,40 @@ class ClawAPIConfigManager:
 def main():
     """CLI 入口"""
     import sys
-    
-    if len(sys.argv) < 2:
-        print("\n🔧 ClawAPI Config Manager")
-        print("\nProvider Management:")
-        print("  list-providers              List all providers")
-        print("  add-provider <name> <url> <key>")
 
-    def validate_config(self) -> dict:
-        """验证配置文件"""
-        config = self._load_config()
-        issues = []
-        
-        # 检查模型 ID 格式
-        providers = config.get('models', {}).get('providers', {})
-        for name, provider in providers.items():
-            for model in provider.get('models', []):
-                model_id = model.get('id', '')
-                # 检查是否有错误的前缀
-                if '/' in model_id and model_id.count('/') > 1:
-                    issues.append({
-                        'type': 'invalid_model_id',
-                        'provider': name,
-                        'model': model_id,
-                        'fix': f'{name}/{model_id.split("/")[-1]}'
-                    })
-        
-        # 检查默认模型配置
-        default_model = config.get('agents', {}).get('defaults', {}).get('model')
-        if default_model and '/' in default_model:
-            parts = default_model.split('/')
-            if len(parts) > 2 or ':' in default_model:
-                issues.append({
-                    'type': 'invalid_default_model',
-                    'current': default_model,
-                    'fix': 'Should be: provider/model-id'
-                })
-        
-        # 检查根级别的无效 key
-        invalid_root_keys = ['model']
-        for key in invalid_root_keys:
-            if key in config:
-                issues.append({
-                    'type': 'invalid_root_key',
-                    'key': key,
-                    'value': config[key],
-                    'fix': f'Move to agents.defaults.{key}'
-                })
-        
-        return {
-            'valid': len(issues) == 0,
-            'issues': issues
-        }
-    
-    def auto_fix(self) -> dict:
-        """自动修复常见配置问题"""
-        validation = self.validate_config()
-        if validation['valid']:
-            return {'fixed': 0, 'issues': []}
-        
-        config = self._load_config()
-        fixed = []
-        
-        for issue in validation['issues']:
-            if issue['type'] == 'invalid_default_model':
-                old = issue['current']
-                parts = old.replace(':', '/').split('/')
-                if len(parts) >= 2:
-                    new = f"{parts[-2]}/{parts[-1]}"
-                    config['agents']['defaults']['model'] = new
-                    fixed.append(f"Fixed default model: {old} → {new}")
-            
-            elif issue['type'] == 'invalid_root_key':
-                del config[issue['key']]
-                fixed.append(f"Removed invalid root key: {issue['key']}")
-        
-        if fixed:
-            self._save_config(config)
-        
-        return {'fixed': len(fixed), 'issues': fixed}
+    manager = FreeClawConfigManager()
+
+    if len(sys.argv) < 2:
+        print("\nFreeClaw Config Manager")
+        print("\nCommands:")
+        print("  status                      Show configuration status")
+        print("  list-providers              List all providers")
+        print("  validate                    Validate configuration")
+        print("  auto-fix                    Auto-fix common issues")
+        sys.exit(0)
+
+    cmd = sys.argv[1]
+    if cmd == 'status':
+        manager.show_status()
+    elif cmd == 'list-providers':
+        for p in manager.list_providers():
+            print(f"  {p['name']}: {p['model_count']} models, key: {p['api_key']}")
+    elif cmd == 'validate':
+        result = manager.validate_config()
+        if result['valid']:
+            print("Configuration is valid")
+        else:
+            for issue in result['issues']:
+                print(f"  Issue: {issue}")
+    elif cmd == 'auto-fix':
+        result = manager.auto_fix()
+        print(f"Fixed {result['fixed']} issues")
+        for fix in result['issues']:
+            print(f"  {fix}")
+    else:
+        print(f"Unknown command: {cmd}")
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
