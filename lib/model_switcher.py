@@ -100,7 +100,7 @@ class ModelSwitcher:
         try:
             subprocess.run(['openclaw', 'daemon', 'restart'], 
                           capture_output=True, timeout=5)
-        except:
+        except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
             pass  # Daemon restart is optional
         
         return True

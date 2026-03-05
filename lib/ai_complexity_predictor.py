@@ -144,7 +144,7 @@ Reply with ONLY a number 1-10:"""
             else:
                 return "expensive", confidence
         
-        except:
+        except Exception:
             return self._fallback_predict(task), 0.5
 
 

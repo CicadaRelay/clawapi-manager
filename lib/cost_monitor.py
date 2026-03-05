@@ -127,7 +127,7 @@ def get_chart_data(days=30):
         day_costs = costs['daily'].get(date, {})
         day_by_model = costs['by_model']['daily'].get(date, {})
         
-        for provider in ['antigravity', 'codex', 'copilot', 'windsurf']:
+        for provider in day_costs.keys():
             data[provider].append(day_costs.get(provider, 0.0))
         
         # Group by model

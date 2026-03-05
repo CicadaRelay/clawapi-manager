@@ -112,7 +112,7 @@ class BalanceChecker:
                     output += "⚠️ 余额不足 $5\n"
                 elif balance < 10:
                     output += "⚠️ 余额较低\n"
-            except:
+            except (ValueError, TypeError):
                 pass
             
             return output
