@@ -108,6 +108,12 @@ PROVIDER_CONFIGS = {
         'health_endpoint': '/v1/health',
         'quota_mapping': {'used': 'consumed', 'total': 'allocated'}
     },
+    'firecrawl': {
+        'env_key': 'FIRECRAWL_API_KEY', 'env_url': 'FIRECRAWL_BASE_URL',
+        'auth_prefix': 'Bearer', 'quota_endpoint': '/v1/scrape',
+        'health_endpoint': '/v1/scrape',
+        'quota_mapping': {'used': 'used', 'total': 'limit'}
+    },
 }
 
 

@@ -54,3 +54,16 @@ config/*_keys.json
 lib/__pycache__/
 .freeclaw_env
 data/
+.gitnexus
+
+# Claude/OMC
+.claude/
+.omc/
+AGENTS.md
+ANALYSIS_SUMMARY.md
+BRIEF.txt
+INDEX.md
+OPTIMIZATION_QUICK_START.md
+PERFORMANCE_ANALYSIS.md
+README_PERFORMANCE.md
+ROUTING_CALLFLOW.md

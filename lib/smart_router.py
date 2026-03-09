@@ -45,10 +45,13 @@ DEFAULT_SIGNALS = {
                "check", "list", "find", "count", "status"],
     "complex": ["analyze", "write code", "debug", "architect",
                 "design", "implement", "refactor", "review"],
+    "crawl": ["scrape", "crawl", "extract page", "fetch page", "grab page",
+              "抓取", "爬取", "提取网页", "网页内容"],
 }
 
 
-def load_config() -> dict:
+def _load_config_from_disk() -> dict:
+    """从磁盘读取配置（供 config_cache 调用）"""
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, 'r') as f:
@@ -56,6 +59,15 @@ def load_config() -> dict:
         except json.JSONDecodeError:
             pass
     return get_default_config()
+
+
+def load_config() -> dict:
+    """获取配置（带 TTL 缓存，热路径零 IO）"""
+    try:
+        from lib.config_cache import get_config
+    except ImportError:
+        from config_cache import get_config
+    return get_config()
 
 
 def get_default_config() -> dict:
@@ -73,12 +85,34 @@ def get_default_config() -> dict:
 
 
 def save_config(config: dict):
+    try:
+        from lib.config_cache import invalidate
+    except ImportError:
+        from config_cache import invalidate
     with open(CONFIG_FILE, 'w') as f:
         json.dump(config, f, indent=2)
+    invalidate()
 
 
 def analyze_complexity(task: str) -> str:
-    """分析任务复杂度，返回 free/medium/expensive"""
+    """分析任务复杂度，返回 free/medium/expensive/crawl
+    快速路径：关键词匹配命中则直接返回，跳过 AI 预测
+    """
+    config = load_config()
+    signals = config.get('signals', DEFAULT_SIGNALS)
+    task_lower = task.lower()
+
+    # 爬取类优先检测（AI predictor 不识别 crawl 分类）
+    if any(s in task_lower for s in signals.get('crawl', [])):
+        return "crawl"
+
+    # 快速路径：关键词命中直接返回，避免简单请求触发 AI 分析
+    if any(s in task_lower for s in signals.get('simple', [])):
+        return "free"
+    if any(s in task_lower for s in signals.get('complex', [])):
+        return "expensive"
+
+    # 慢路径：仅无法关键词匹配时才走 AI 预测
     try:
         from ai_complexity_predictor import AIComplexityPredictor
         predictor = AIComplexityPredictor()
@@ -86,27 +120,33 @@ def analyze_complexity(task: str) -> str:
     except ImportError:
         pass
 
-    config = load_config()
-    signals = config.get('signals', DEFAULT_SIGNALS)
-    task_lower = task.lower()
-
-    if any(s in task_lower for s in signals.get('simple', [])):
-        return "free"
-    if any(s in task_lower for s in signals.get('complex', [])):
-        return "expensive"
     return "medium"
 
 
+_mesh_tier_cache: Optional[str] = None
+_mesh_tier_ts: float = 0.0
+_MESH_TIER_TTL: float = 10.0  # 10s TTL，预算层级变化不频繁
+
+
 def get_mesh_tier() -> Optional[str]:
-    """查询 FSC-Mesh 预算状态，返回当前允许的模型层级"""
+    """查询 FSC-Mesh 预算状态，返回当前允许的模型层级
+    本地缓存 10s，避免每次路由都同步查 Redis
+    """
+    global _mesh_tier_cache, _mesh_tier_ts
+    now = time.monotonic()
+    if _mesh_tier_cache is not None and (now - _mesh_tier_ts) < _MESH_TIER_TTL:
+        return _mesh_tier_cache
+
     try:
         from lib.mesh_bridge import MeshBridge
         bridge = MeshBridge()
         tier = bridge.get_current_tier()
         bridge.close()
+        _mesh_tier_cache = tier
+        _mesh_tier_ts = now
         return tier
     except Exception:
-        return None
+        return _mesh_tier_cache  # Redis 挂了返回上次缓存值而非 None
 
 
 def get_model_for_task(task: str) -> str:
@@ -245,15 +285,78 @@ def record_provider_success(name: str):
         save_config(config)
 
 
-def route_task(task: str, target_model: str = None) -> dict:
-    """完整路由：分析任务 → 选模型 → 返回路由结果
+def route_task(task: str, target_model: str = None, url: str = None, **kwargs) -> dict:
+    """完整路由：分析任务 → 选模型/服务 → 返回路由结果
     自动上报成本到 mesh 预算系统
+    爬取类任务自动路由到 Firecrawl
     """
+    complexity = analyze_complexity(task)
+
+    # 爬取类任务 → 三级路由：Device > Scrapling > Firecrawl
+    if complexity == "crawl":
+        if url:
+            # 第一级：重度反爬(微信/知乎APP) → 设备端抓取
+            try:
+                from device_provider import get_device_type, is_device_available, route_device_crawl
+                device_type = get_device_type(url)
+                if device_type and is_device_available(device_type):
+                    return {
+                        "task": task[:100],
+                        "complexity": "crawl",
+                        "provider": f"device:{device_type}",
+                        "routed_to": "device",
+                        "result": route_device_crawl(task, url=url, **kwargs),
+                    }
+            except ImportError:
+                pass
+
+            # 第二级：中度反爬(国内站点) → Scrapling 本地反检测
+            try:
+                from scrapling_provider import should_use_scrapling, route_stealth_crawl
+                if should_use_scrapling(url):
+                    return {
+                        "task": task[:100],
+                        "complexity": "crawl",
+                        "provider": "scrapling",
+                        "routed_to": "scrapling",
+                        "result": route_stealth_crawl(task, url=url, **kwargs),
+                    }
+            except ImportError:
+                pass
+
+        # 第三级：通用站点 → Firecrawl SaaS API
+        try:
+            from firecrawl_provider import is_crawl_task, route_crawl
+            if is_crawl_task(task):
+                return {
+                    "task": task[:100],
+                    "complexity": "crawl",
+                    "provider": "firecrawl",
+                    "routed_to": "firecrawl",
+                    "result": route_crawl(task, url=url, **kwargs),
+                }
+        except ImportError:
+            pass
+
     if target_model is None:
         target_model = get_model_for_task(task)
-
-    complexity = analyze_complexity(task)
     mesh_tier = get_mesh_tier()
+
+    # PUAClaw Boost: 根据任务+模型注入最优 system prompt
+    boost_prompt = None
+    boost_info = None
+    try:
+        from lib.puaclaw_boost import get_best_boost
+        boost = get_best_boost(task, target_model)
+        if boost and boost["expected_score"] >= 65:
+            boost_prompt = boost["system_prompt"]
+            boost_info = {
+                "template": boost["template_name"],
+                "technique": boost["technique"],
+                "score": boost["expected_score"],
+            }
+    except ImportError:
+        pass
 
     result = {
         "task": task[:100],
@@ -261,6 +364,10 @@ def route_task(task: str, target_model: str = None) -> dict:
         "model": target_model,
         "is_free": complexity == "free",
     }
+
+    if boost_prompt:
+        result["system_prompt_boost"] = boost_prompt
+        result["boost"] = boost_info
 
     if mesh_tier:
         result["mesh_tier"] = mesh_tier
