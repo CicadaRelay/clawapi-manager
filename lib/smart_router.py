@@ -285,6 +285,54 @@ def record_provider_success(name: str):
         save_config(config)
 
 
+def _asl_route(task: str, complexity: str, kwargs: dict) -> Optional[dict]:
+    """ASL integration: formulate action + elastic route. Returns None on error."""
+    try:
+        from lib.action_cost import ActionFormulator, ActionSource, Complexity
+        from lib.budget_gate import BudgetGate
+        from lib.elastic_router import ElasticRouter
+        from lib.mesh_bridge import MeshBridge
+
+        complexity_map = {"free": Complexity.FREE, "simple": Complexity.FREE,
+                          "complex": Complexity.EXPENSIVE}
+        cx = complexity_map.get(complexity, Complexity.MEDIUM)
+
+        # Rough prompt token estimate (task chars / 4)
+        prompt_tokens = max(100, len(task) // 4)
+
+        formulator = ActionFormulator()
+        action = formulator.formulate(
+            task_id=kwargs.get("task_id", "freeclaw"),
+            source=ActionSource.OMC,
+            prompt_tokens=prompt_tokens,
+            category=kwargs.get("category", "general"),
+            complexity=cx,
+            priority=kwargs.get("priority", 50),
+            agent_name=kwargs.get("agent_name", ""),
+            degradable=kwargs.get("degradable", True),
+            min_model=kwargs.get("min_model", "free"),
+        )
+
+        bridge = MeshBridge()
+        if not bridge.ping():
+            return None
+
+        gate = BudgetGate(bridge.client)
+        router = ElasticRouter(gate)
+        decision = router.route(action)
+
+        return {
+            "status": decision.status.value,
+            "model": decision.model,
+            "model_tier": decision.model_tier,
+            "action_id": decision.action_id,
+            "reserved_cost": decision.reserved_cost,
+            "reason": decision.reason,
+        }
+    except Exception:
+        return None
+
+
 def route_task(task: str, target_model: str = None, url: str = None, **kwargs) -> dict:
     """完整路由：分析任务 → 选模型/服务 → 返回路由结果
     自动上报成本到 mesh 预算系统
@@ -338,6 +386,13 @@ def route_task(task: str, target_model: str = None, url: str = None, **kwargs) -
         except ImportError:
             pass
 
+    # ASL: Action Scheduler Layer — elastic model routing under budget pressure
+    asl_decision = None
+    if os.getenv("ASL_ENABLED", "").lower() == "true" and complexity != "crawl":
+        asl_decision = _asl_route(task, complexity, kwargs)
+        if asl_decision and asl_decision.get("status") == "dispatch":
+            target_model = asl_decision["model"]
+
     if target_model is None:
         target_model = get_model_for_task(task)
     mesh_tier = get_mesh_tier()
@@ -372,6 +427,10 @@ def route_task(task: str, target_model: str = None, url: str = None, **kwargs) -
     if mesh_tier:
         result["mesh_tier"] = mesh_tier
         result["mesh_constrained"] = mesh_tier in ("economy", "free", "paused")
+
+    # ASL: attach scheduling decision for downstream reconciliation
+    if asl_decision:
+        result["asl"] = asl_decision
 
     return result
 
